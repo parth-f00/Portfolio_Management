@@ -6,13 +6,14 @@ import org.neueda.rest.project.service.FinnhubService;
 import org.neueda.rest.project.service.InvestmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/portfolio")
-@CrossOrigin(origins = "*", allowedHeaders = "*")
+@CrossOrigin(origins = "*")
 public class InvestmentController {
     @Autowired
     private InvestmentService investmentService;
@@ -63,5 +64,16 @@ public class InvestmentController {
             return investmentService.getAdvisorSUggestions();
         }
 
+        @PostMapping("/preview-csv")
+        public List<Investment> previewCSV(@RequestParam("file")MultipartFile file){
+            return investmentService.parseCsv(file);
+        }
+
+        @PostMapping("/batch")
+        public List<Investment> saveBatch(@RequestBody List<Investment> investments){
+//            investmentService.saveBatch(file);
+//            return "Batch upload successful";
+            return investmentService.saveAll(investments);
+        }
 
 }

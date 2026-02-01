@@ -19,7 +19,7 @@ public class DashboardDTO {
     private Double percentageChange;
     private Integer quantity;
     private LocalDateTime purchaseDate;
-
+    private String trend;
     public Long getId() {
         return id;
     }
@@ -98,6 +98,14 @@ public class DashboardDTO {
 
     public void setPurchaseDate(LocalDateTime purchaseDate) {
         this.purchaseDate = purchaseDate;
+    }
+
+    public String getTrend() {
+        return trend;
+    }
+
+    public void setTrend(String trend) {
+        this.trend = trend;
     }
 
     public DashboardDTO() {

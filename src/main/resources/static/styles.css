@@ -1,0 +1,115 @@
+/* Import Google Font */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+body {
+    background-color: #f4f6f9; /* Light Gray Background */
+    font-family: 'Inter', sans-serif;
+    color: #333;
+}
+
+/* --- NAVBAR --- */
+.navbar {
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+    padding: 1rem 0;
+}
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.5rem;
+    letter-spacing: 0.5px;
+}
+
+/* --- STAT CARDS --- */
+.stat-card {
+    background: white;
+    border: none;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    transition: transform 0.2s ease;
+    height: 100%;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+}
+
+/* --- MAIN DASHBOARD CARD --- */
+.dashboard-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    border: none;
+    overflow: hidden;
+}
+
+.card-header-custom {
+    background: white;
+    padding: 20px 25px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* --- MODERN TABLE --- */
+.table thead th {
+    background-color: #f8f9fa;
+    color: #6c757d;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    border-top: none;
+    padding: 15px 25px;
+}
+
+.table tbody td {
+    padding: 15px 25px;
+    vertical-align: middle;
+    font-size: 0.95rem;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+/* --- BUTTONS --- */
+.btn-primary {
+    background-color: #2a5298;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+.btn-primary:hover {
+    background-color: #1e3c72;
+}
+
+.btn-success-soft {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    border: none;
+    font-weight: 600;
+}
+
+.btn-success-soft:hover {
+    background-color: #c8e6c9;
+    color: #1b5e20;
+}
+/* --- CHART CONTAINER --- */
+.chart-container {
+    position: relative;
+    height: 300px; /* Forces the chart to have a fixed height */
+    width: 100%;
+}

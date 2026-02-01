@@ -1,11 +1,17 @@
 package org.neueda.rest.project.service;
 
+import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvValidationException;
 import org.neueda.rest.project.dto.DashboardDTO;
 import org.neueda.rest.project.entity.Investment;
 import org.neueda.rest.project.repository.InvestmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -47,7 +53,22 @@ public class InvestmentService {
             else{
                 dto.setPercentageChange(0.0);
             }
+            String trend="neutral";
+            try{
+                Map<String, Object> history=finnhubService.getCompanyHistory(inv.getTicker());
+                if(history.containsKey("sma")) {
+                    Double sma = (Double) history.get("sma");
 
+                    if (currentPrice.compareTo(BigDecimal.valueOf(sma))>0) {
+                        trend="UP";
+                    } else {
+                        trend="DOWN";
+                    }
+                }
+            }catch (Exception e){
+                System.out.println("trend calculation failed for "+inv.getTicker());
+            }
+            dto.setTrend(trend);
             dashboard.add(dto);
 
         }
@@ -165,6 +186,87 @@ public class InvestmentService {
            }
        }
        return suggestions;
+   }
+
+   public List<Investment> parseCsv(MultipartFile file){
+        List<Investment> previewList=new ArrayList<>();
+       try(Reader reader=new InputStreamReader(file.getInputStream());
+           CSVReader csvReader=new CSVReader(reader)){
+
+           String[] headers=csvReader.readNext();
+           if(headers==null){
+
+               return null;
+           }
+
+           Map<String,Integer>headerIndexMap=new HashMap<>();
+           for(int i=0;i<headers.length;i++){
+               String cleanHeader=headers[i].trim().toUpperCase().replace(" ","").replace("_","");
+                headerIndexMap.put(cleanHeader,i);
+           }
+           if(!headerIndexMap.containsKey("TICKER") && !headerIndexMap.containsKey("SYMBOL")){
+               throw new RuntimeException("CSV must contain Ticker or Symbol column");
+           }
+
+           String[] row;
+           while((row=csvReader.readNext())!=null){
+               try {
+                   Integer tickeridx = headerIndexMap.getOrDefault("TICKER", headerIndexMap.get("SYMBOL"));
+                   if (tickeridx == null || tickeridx >= row.length) {
+                       continue;
+                   }
+                   String ticker = row[tickeridx].trim().toUpperCase();
+                   if (ticker.isEmpty()) {
+                       continue;
+
+                   }
+                   Integer priceIdx = headerIndexMap.get("PRICE");
+                   if (priceIdx == null) priceIdx = headerIndexMap.get("BUYPRICE");
+                   if (priceIdx == null) priceIdx = headerIndexMap.get("COST");
+                   if (priceIdx == null || priceIdx >= row.length) {
+                       continue;
+                   }
+                   BigDecimal price = new BigDecimal(row[priceIdx].trim());
+
+                   Integer qtyIdx = headerIndexMap.get("QUANTITY");
+                   if (qtyIdx == null) qtyIdx = headerIndexMap.get("QTY");
+                   if (qtyIdx == null) qtyIdx = headerIndexMap.get("SHARES");
+                   if (qtyIdx == null || qtyIdx >= row.length) {
+                       continue;
+                   }
+                   int quantity = 1;
+                   if (qtyIdx != null && qtyIdx < row.length && !row[qtyIdx].trim().isEmpty()) {
+                       quantity = Integer.parseInt(row[qtyIdx].trim());
+                   }
+
+                   Integer sectorIdx = headerIndexMap.get("SECTOR");
+                   if (sectorIdx == null) sectorIdx = headerIndexMap.get("INDUSTRY");
+                   String sector = "Other";
+                   if (sectorIdx != null && sectorIdx < row.length) {
+                       sector = row[sectorIdx].trim();
+                   }
+                   Investment inv = new Investment();
+                   inv.setTicker(ticker);
+                   inv.setBuyPrice(price);
+                   inv.setQuantity(quantity);
+                   inv.setSector(sector);
+
+
+//                   repository.save(inv);
+                   previewList.add(inv);
+               }catch (Exception e){
+                   //log and continue
+                   System.out.println("Error processing row: "+ Arrays.toString(row)+" , error: "+e.getMessage());
+               }
+           }
+       } catch (IOException | RuntimeException  |CsvValidationException e) {
+           throw new RuntimeException("Failed to parse CSV file: " + e.getMessage());
+       }
+       return previewList;
+   }
+
+   public List<Investment> saveAll(List<Investment> investments){
+        return repository.saveAll(investments);
    }
 
 }

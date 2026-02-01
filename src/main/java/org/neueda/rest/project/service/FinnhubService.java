@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class FinnhubService {
@@ -50,8 +51,37 @@ public class FinnhubService {
 //        }
 //    }
 
+    private static final long CACHE_DURATION_MS = 5 * 60 * 1000; // 5 minutes
+    private final Map<String, CachedItem<BigDecimal>> priceCache = new ConcurrentHashMap<>();
+    private final Map<String, CachedItem<Map<String, Object>>> historyCache = new ConcurrentHashMap<>();
+
+    private static class CachedItem<T>{
+        T data;
+        long timestamp;
+
+        public CachedItem(T data){
+            this.data=data;
+            this.timestamp=System.currentTimeMillis();
+        }
+
+        boolean isExpired(){
+            return System.currentTimeMillis() - timestamp > CACHE_DURATION_MS;
+        }
+    }
+
+
+
 
     public Map<String,Object> getCompanyHistory(String Ticker){
+        if(historyCache.containsKey(Ticker)){
+            CachedItem<Map<String,Object>> cachedItem= historyCache.get(Ticker);
+            if(!cachedItem.isExpired()){
+                System.out.println("Cache hit for history: "+Ticker);
+                return cachedItem.data;
+            }
+        }
+        System.out.println("Cache miss for history: "+Ticker);
+
         String tiingoKey="ed6323f960843c766b96a3ffe4ed866599aa1fa9";
         String startDate= LocalDate.now().minusDays(30).toString();
 //        String startDate="2023-01-01";
@@ -97,6 +127,7 @@ public class FinnhubService {
             finalResult.put("sma", sma);
             finalResult.put("s", "ok");
             finalResult.put("prices", response);
+            historyCache.put(Ticker, new CachedItem<>(finalResult));
             return finalResult;
         } catch (Exception e) {
             System.out.println("Error fetching company history: "+Ticker + e.getMessage());
@@ -107,11 +138,21 @@ public class FinnhubService {
 
 
     public BigDecimal getStockPrice(String ticker){
+        if(priceCache.containsKey(ticker)){
+            CachedItem<BigDecimal> cachedItem= priceCache.get(ticker);
+            if(!cachedItem.isExpired()){
+                System.out.println("Cache hit for price: "+ticker);
+                return cachedItem.data;
+            }
+        }
+        System.out.println("Cache miss for price: "+ticker);
         try {
             String finalUrl= apiUrl+ticker+"&token="+apiKey;
             RestTemplate restTemplate= new RestTemplate();
             FinnhubResponse response= restTemplate.getForObject(finalUrl, FinnhubResponse.class);
             if(response!=null && response.getCurrentPrice()!=null){
+                BigDecimal price= BigDecimal.valueOf(response.getCurrentPrice());
+                priceCache.put(ticker,new CachedItem<>(price));
                 return BigDecimal.valueOf(response.getCurrentPrice());
             }
             return BigDecimal.ZERO;
