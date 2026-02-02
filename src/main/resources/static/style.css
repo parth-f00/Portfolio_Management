@@ -1,0 +1,42 @@
+body { overflow-x: hidden; background-color: #f8f9fc; }
+#sidebar-wrapper { min-height: 100vh; width: 260px; position: fixed; z-index: 1000; }
+#page-content-wrapper { margin-left: 260px; width: calc(100% - 260px); min-height: 100vh; }
+
+.list-group-item { border: none; transition: 0.2s; }
+.list-group-item:hover { background-color: #343a40 !important; color: #ffc107 !important; padding-left: 1.5rem !important; }
+.active-nav { background-color: #212529 !important; color: #ffc107 !important; border-left: 4px solid #ffc107; font-weight: 600; }
+
+.card { border: none; border-radius: 12px; transition: transform 0.2s; }
+.view-section { animation: fadeIn 0.4s ease-in-out; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+.trend-up { color: #1cc88a; }
+.trend-down { color: #e74a3b; }
+.bg-light-success { background-color: #d1f7e9; }
+.bg-light-danger { background-color: #ffdce0; }
+
+/* Simulator Results Styling */
+#sector-impact-list .impact-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+}
+
+#sector-impact-list .impact-row:last-child {
+    border-bottom: none;
+}
+
+#sim-risk-icon-box {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.progress-bar {
+    transition: width 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
