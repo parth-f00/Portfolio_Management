@@ -1,4 +1,5 @@
 package org.neueda.rest.project.service;
+import org.neueda.rest.project.dto.PortfolioSummary;
 
 import org.neueda.rest.project.dto.DashboardDTO;
 import org.neueda.rest.project.entity.Investment;
@@ -166,5 +167,58 @@ public class InvestmentService {
        }
        return suggestions;
    }
+
+    public PortfolioSummary getPortfolioSummary() {
+
+        List<Investment> investments = repository.findAll();
+
+        if (investments.isEmpty()) {
+            return new PortfolioSummary(0.0, 0, "N/A", "N/A");
+        }
+
+        double totalValue = 0.0;
+        String topHolding = "";
+        String worstHolding = "";
+        double maxValue = Double.MIN_VALUE;
+        double minValue = Double.MAX_VALUE;
+
+        Map<String, Double> priceCache = new HashMap<>();
+
+        for (Investment inv : investments) {
+
+            String ticker = inv.getTicker();
+            double price;
+
+            if (priceCache.containsKey(ticker)) {
+                price = priceCache.get(ticker);
+            } else {
+                BigDecimal priceBd = finnhubService.getStockPrice(ticker);
+                price = (priceBd != null)
+                        ? priceBd.doubleValue()
+                        : inv.getBuyPrice().doubleValue();
+                priceCache.put(ticker, price);
+            }
+
+            double value = price * inv.getQuantity();
+            totalValue += value;
+
+            if (value > maxValue) {
+                maxValue = value;
+                topHolding = ticker;
+            }
+
+            if (value < minValue) {
+                minValue = value;
+                worstHolding = ticker;
+            }
+        }
+
+        return new PortfolioSummary(
+                totalValue,
+                investments.size(),
+                topHolding,
+                worstHolding
+        );
+    }
 
 }

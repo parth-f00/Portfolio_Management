@@ -1,6 +1,7 @@
 
 package org.neueda.rest.project.bot;
 
+import org.neueda.rest.project.dto.PortfolioSummary;
 import org.springframework.stereotype.Service;
 import org.neueda.rest.project.service.InvestmentService;
 
@@ -18,10 +19,18 @@ public class BotService {
     //Processes user query and returns portfolio service
     public BotResponse processQuery(String query) {
 
-        double totalValue = investmentService.getTotalPortfolioValue();
+        PortfolioSummary summary = investmentService.getPortfolioSummary();
+
 
         //Simple rule-based response
-        String response = "Your total portfolio value is " + totalValue;
+        String response = String.format(
+                "Your portfolio has %d assets with a total value of %.2f. " +
+                        "Top holding: %s. Weakest holding: %s.",
+                summary.getTotalAssets(),
+                summary.getTotalValue(),
+                summary.getTopHolding(),
+                summary.getWorstHolding()
+        );
 
         return new BotResponse(response);
     }
