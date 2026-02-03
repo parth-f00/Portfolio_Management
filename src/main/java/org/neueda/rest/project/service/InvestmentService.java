@@ -36,6 +36,7 @@ public class InvestmentService {
             dto.setTicker(inv.getTicker());
             dto.setQuantity(inv.getQuantity());
             dto.setBuyPrice(inv.getBuyPrice());
+            dto.setPurchaseDate(inv.getPurchaseDate());
 //            dto.setCompanyName(inv.getCompany);
             BigDecimal currentPrice=finnhubService.getStockPrice(inv.getTicker());
             dto.setCurrentPrice(currentPrice);

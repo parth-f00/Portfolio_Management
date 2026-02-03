@@ -1,571 +1,223 @@
-<!--<!DOCTYPE html>-->
-<!--<html lang="en">-->
-<!--<head>-->
-<!--    <meta charset="UTF-8">-->
-<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
-<!--    <title>My Portfolio Tracker</title>-->
-
-<!--    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">-->
-
-<!--    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">-->
-
-<!--    <style>-->
-<!--        body { font-family: 'Inter', sans-serif; background-color: #f8f9fa; }-->
-<!--        .card { border: none; border-radius: 12px; }-->
-<!--        .card-header { background-color: white; border-bottom: 1px solid #f0f0f0; font-weight: 600; }-->
-<!--        .display-4 { font-weight: 700; color: #fff; }-->
-<!--    </style>-->
-<!--</head>-->
-<!--<body class="p-4">-->
-
-<!--<div class="container">-->
-
-<!--&lt;!&ndash;    <div class="d-flex justify-content-between align-items-center mb-4">&ndash;&gt;-->
-<!--&lt;!&ndash;        <h2 class="text-dark fw-bold">My Portfolio</h2>&ndash;&gt;-->
-<!--&lt;!&ndash;        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addStockModal">&ndash;&gt;-->
-<!--&lt;!&ndash;            + Add Stock&ndash;&gt;-->
-<!--&lt;!&ndash;        </button>&ndash;&gt;-->
-<!--&lt;!&ndash;    </div>&ndash;&gt;-->
-
-<!--    <div class="d-flex justify-content-between align-items-center mb-4">-->
-<!--        <h2 class="text-dark fw-bold">My Portfolio</h2>-->
-
-<!--        <div>-->
-<!--            <input type="file" id="csvInput" style="display: none;" accept=".csv" onchange="uploadCSV()">-->
-
-<!--            <button class="btn btn-success me-2" onclick="document.getElementById('csvInput').click()">-->
-<!--                📂 Upload CSV-->
-<!--            </button>-->
-
-<!--            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addStockModal">-->
-<!--                + Add Stock-->
-<!--            </button>-->
-<!--        </div>-->
-<!--    </div>-->
-
-<!--    <div class="row mb-4">-->
-<!--        <div class="col-12">-->
-<!--            <div class="card bg-primary text-white shadow-sm">-->
-<!--                <div class="card-body text-center py-5">-->
-<!--                    <h5 class="opacity-75">TOTAL NET WORTH</h5>-->
-<!--                    <h1 class="display-4" id="total-value-display">Loading...</h1>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--    </div>-->
-
-<!--    <div class="row g-4">-->
-
-<!--        <div class="col-lg-8">-->
-<!--            <div class="card shadow-sm h-100">-->
-<!--                <div class="card-header py-3">-->
-<!--                    <span class="text-primary">Current Holdings</span>-->
-<!--                </div>-->
-<!--                <div class="card-body">-->
-<!--                    <div class="table-responsive">-->
-<!--                        <table class="table table-hover align-middle">-->
-<!--                            <thead class="table-light">-->
-<!--                            <tr>-->
-<!--                                <th>Ticker</th>-->
-<!--                                <th>Price</th>-->
-<!--                                <th>Trend</th>-->
-<!--                                <th>Qty</th>-->
-<!--                                <th>Value</th>-->
-<!--                                <th>P/L</th>-->
-<!--                                <th>Action</th>-->
-<!--                            </tr>-->
-<!--                            </thead>-->
-<!--                            <tbody id="portfolio-table-body">-->
-<!--                            </tbody>-->
-<!--                        </table>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--        </div>-->
-
-<!--        <div class="col-lg-4">-->
-<!--            <div class="card shadow-sm h-100">-->
-<!--                <div class="card-header py-3">-->
-<!--                    <span class="text-primary">Allocation</span>-->
-<!--                </div>-->
-<!--                <div class="card-body">-->
-<!--                    <div style="height: 250px; position: relative;">-->
-<!--                        <canvas id="sectorChart"></canvas>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--    </div>-->
-
-<!--    <div class="row g-4 mt-1">-->
-
-<!--        <div class="col-lg-8">-->
-<!--            <div class="card shadow-sm">-->
-<!--                <div class="card-header py-3">-->
-<!--                    <span class="text-primary">Performance History</span>-->
-<!--                </div>-->
-<!--                <div class="card-body">-->
-<!--                    <div style="height: 300px;">-->
-<!--                        <canvas id="historyChart"></canvas>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--        </div>-->
-
-<!--        <div class="col-lg-4">-->
-<!--            <div class="card shadow-sm h-100">-->
-<!--                <div class="card-header py-3 bg-warning bg-opacity-10">-->
-<!--                    <span class="text-warning-emphasis fw-bold"> Advisor Suggestions</span>-->
-<!--                </div>-->
-<!--                <div class="card-body">-->
-<!--                    <ul class="list-group list-group-flush" id="advisor-list">-->
-<!--                        <li class="list-group-item text-muted">Analyzing market data...</li>-->
-<!--                    </ul>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--    </div>-->
-
-<!--</div>-->
-
-<!--<div class="modal fade" id="addStockModal" tabindex="-1">-->
-<!--    <div class="modal-dialog">-->
-<!--        <div class="modal-content">-->
-<!--            <div class="modal-header">-->
-<!--                <h5 class="modal-title">Add New Investment</h5>-->
-<!--                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>-->
-<!--            </div>-->
-<!--            <div class="modal-body">-->
-<!--                <form id="addStockForm">-->
-<!--                    <div class="mb-3">-->
-<!--                        <label>Ticker Symbol</label>-->
-<!--                        <input type="text" id="tickerInput" class="form-control" placeholder="e.g. AAPL" required>-->
-<!--                    </div>-->
-<!--                    <div class="mb-3">-->
-<!--                        <label>Buy Price</label>-->
-<!--                        <input type="number" step="0.01" id="buyPriceInput" class="form-control" placeholder="150.00" required>-->
-<!--                    </div>-->
-<!--                    <div class="mb-3">-->
-<!--                        <label>Quantity</label>-->
-<!--                        <input type="number" id="quantityInput" class="form-control" placeholder="10" required>-->
-<!--                    </div>-->
-<!--                    <div class="mb-3">-->
-<!--                        <label>Sector</label>-->
-<!--                        <select id="sectorInput" class="form-select">-->
-<!--                            <option value="Technology">Technology</option>-->
-<!--                            <option value="Finance">Finance</option>-->
-<!--                            <option value="Automotive">Automotive</option>-->
-<!--                            <option value="Healthcare">Healthcare</option>-->
-<!--                            <option value="Energy">Energy</option>-->
-<!--                            <option value="Other">Other</option>-->
-<!--                        </select>-->
-<!--                    </div>-->
-<!--                </form>-->
-<!--            </div>-->
-<!--            <div class="modal-footer">-->
-<!--                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>-->
-<!--                <button type="button" class="btn btn-primary" onclick="addStock()">Save Investment</button>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--    </div>-->
-<!--</div>-->
-<!--<div class="modal fade" id="reviewModal" tabindex="-1" data-bs-backdrop="static">-->
-<!--    <div class="modal-dialog modal-lg">-->
-<!--        <div class="modal-content">-->
-<!--            <div class="modal-header bg-primary text-white">-->
-<!--                <h5 class="modal-title">Review & Edit Data</h5>-->
-<!--                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>-->
-<!--            </div>-->
-<!--            <div class="modal-body">-->
-<!--                <p class="text-muted">Please check the data below. Edit any missing fields before saving.</p>-->
-<!--                <div class="table-responsive">-->
-<!--                    <table class="table table-bordered table-sm">-->
-<!--                        <thead class="table-light">-->
-<!--                        <tr>-->
-<!--                            <th>Ticker</th>-->
-<!--                            <th>Price</th>-->
-<!--                            <th>Qty</th>-->
-<!--                            <th>Sector</th>-->
-<!--                            <th>Action</th>-->
-<!--                        </tr>-->
-<!--                        </thead>-->
-<!--                        <tbody id="review-table-body">-->
-<!--                        </tbody>-->
-<!--                    </table>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--            <div class="modal-footer">-->
-<!--                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>-->
-<!--                <button type="button" class="btn btn-success" onclick="confirmBatchUpload()">✅ Save All</button>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--    </div>-->
-<!--</div>-->
-<!--<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>-->
-<!--<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>-->
-<!--<script src="script.js"></script>-->
-
-<!--</body>-->
-<!--</html>-->
-
-<!--<!DOCTYPE html>-->
-<!--<html lang="en">-->
-<!--<head>-->
-<!--    <meta charset="UTF-8">-->
-<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
-<!--    <title>PortfolioPro Dashboard</title>-->
-
-<!--    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">-->
-<!--    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">-->
-<!--    <link rel="stylesheet" href="styles_old.css">-->
-<!--</head>-->
-<!--<body>-->
-
-<!--<nav class="navbar navbar-dark mb-4">-->
-<!--    <div class="container">-->
-<!--        <a class="navbar-brand" href="#">-->
-<!--            <i class="bi bi-wallet2 me-2"></i>Portfolio<span class="text-info">Pro</span>-->
-<!--        </a>-->
-<!--        <div class="d-flex align-items-center text-white">-->
-<!--                <span class="badge bg-white text-primary me-3">-->
-<!--                    <span id="live-indicator" class="spinner-grow spinner-grow-sm text-danger" role="status"></span>-->
-<!--                    Live Data-->
-<!--                </span>-->
-<!--            <div class="bg-white text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 35px; height: 35px;">-->
-<!--                JS-->
-<!--            </div>-->
-<!--        </div>-->
-<!--    </div>-->
-<!--</nav>-->
-
-<!--<div class="container pb-5">-->
-
-<!--    <div class="row g-4 mb-4">-->
-<!--        <div class="col-md-4">-->
-<!--            <div class="stat-card h-100">-->
-<!--                <div class="d-flex align-items-center">-->
-<!--                    <div class="stat-icon bg-light text-primary me-3">💰</div>-->
-<!--                    <div>-->
-<!--                        <h6 class="text-muted text-uppercase mb-1" style="font-size: 0.75rem;">Total Balance</h6>-->
-<!--                        <h3 class="fw-bold mb-0" id="total-value">$0.00</h3>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--        </div>-->
-
-<!--        <div class="col-md-4">-->
-<!--            <div class="stat-card h-100">-->
-<!--                <div class="d-flex align-items-center">-->
-<!--                    <div class="stat-icon bg-light text-success me-3">📈</div>-->
-<!--                    <div>-->
-<!--                        <h6 class="text-muted text-uppercase mb-1" style="font-size: 0.75rem;">Total Profit / Loss</h6>-->
-<!--                        <h3 class="fw-bold mb-0" id="total-pl">$0.00</h3>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--        </div>-->
-
-<!--        <div class="col-md-4">-->
-<!--            <div class="stat-card h-100 d-flex flex-column justify-content-center">-->
-<!--                <h6 class="text-muted text-uppercase mb-2" style="font-size: 0.75rem;">Quick Actions</h6>-->
-<!--                <div class="d-flex gap-2">-->
-<!--                    <button class="btn btn-primary flex-grow-1" data-bs-toggle="modal" data-bs-target="#addStockModal">-->
-<!--                        <i class="bi bi-plus-lg"></i> Add Stock-->
-<!--                    </button>-->
-<!--                    <input type="file" id="csvInput" style="display: none;" accept=".csv" onchange="uploadCSV()">-->
-<!--                    <button class="btn btn-success-soft flex-grow-1" onclick="document.getElementById('csvInput').click()">-->
-<!--                        <i class="bi bi-upload"></i> Upload CSV-->
-<!--                    </button>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--    </div>-->
-
-<!--    <div class="row g-4">-->
-
-<!--        <div class="col-lg-8">-->
-
-<!--            <div class="dashboard-card mb-4 p-3">-->
-<!--                <div class="card-header-custom border-bottom-0 pb-0 d-flex justify-content-between">-->
-<!--                    <div>-->
-<!--                        <h5 class="fw-bold mb-0">Portfolio Performance</h5>-->
-<!--                        <small class="text-muted">Net Worth History</small>-->
-<!--                    </div>-->
-<!--                    <div class="badge bg-success-soft text-success align-self-start">+12.5% YTD</div>-->
-<!--                </div>-->
-<!--                <div class="card-body">-->
-<!--                    <div class="chart-container" style="height: 300px; width: 100%;">-->
-<!--                        <canvas id="performanceChart"></canvas>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--            </div>-->
-
-<!--            <div class="dashboard-card">-->
-<!--                <div class="card-header-custom">-->
-<!--                    <h5 class="fw-bold mb-0">Your Holdings</h5>-->
-<!--                    <button class="btn btn-sm btn-light border" onclick="location.reload()">-->
-<!--                        <i class="bi bi-arrow-clockwise"></i> Refresh-->
-<!--                    </button>-->
-<!--                </div>-->
-<!--                <div class="table-responsive">-->
-<!--                    <table class="table table-hover mb-0 align-middle">-->
-<!--                        <thead>-->
-<!--                        <tr>-->
-<!--                            <th>Ticker</th>-->
-<!--                            <th>Price</th>-->
-<!--                            <th>Trend</th>-->
-<!--                            <th>Qty</th>-->
-<!--                            <th>Value</th>-->
-<!--                            <th>P/L</th>-->
-<!--                            <th>Action</th>-->
-<!--                        </tr>-->
-<!--                        </thead>-->
-<!--                        <tbody id="portfolio-table-body">-->
-<!--                        </tbody>-->
-<!--                    </table>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--        </div>-->
-
-<!--        <div class="col-lg-4">-->
-
-<!--            <div class="dashboard-card mb-4 p-3">-->
-<!--                <h6 class="fw-bold mb-3">Sector Allocation</h6>-->
-<!--                <div class="chart-container" style="height: 250px; width: 100%;">-->
-<!--                    <canvas id="sectorChart"></canvas>-->
-<!--                </div>-->
-<!--            </div>-->
-
-<!--            <div class="dashboard-card p-0 overflow-hidden">-->
-<!--                <div class="p-3 text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">-->
-<!--                    <h6 class="fw-bold mb-1"><i class="bi bi-robot me-2"></i>AI Insights</h6>-->
-<!--                    <small class="opacity-75">Powered by Market Data</small>-->
-<!--                </div>-->
-<!--                <div class="p-3 bg-white">-->
-<!--                    <ul id="advisor-list" class="list-unstyled mb-0 small text-muted">-->
-<!--                        <li class="d-flex align-items-center mb-2">-->
-<!--                            <span class="spinner-border spinner-border-sm me-2 text-primary"></span>-->
-<!--                            Analyzing market trends...-->
-<!--                        </li>-->
-<!--                    </ul>-->
-<!--                </div>-->
-<!--            </div>-->
-
-<!--        </div> </div> </div> <div class="modal fade" id="addStockModal" tabindex="-1">-->
-<!--    <div class="modal-dialog">-->
-<!--        <div class="modal-content">-->
-<!--            <div class="modal-header">-->
-<!--                <h5 class="modal-title">Add New Investment</h5>-->
-<!--                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>-->
-<!--            </div>-->
-<!--            <div class="modal-body">-->
-<!--                <form id="addStockForm">-->
-<!--                    <div class="mb-3">-->
-<!--                        <label class="form-label">Ticker Symbol</label>-->
-<!--                        <input type="text" class="form-control" id="ticker" placeholder="e.g. AAPL" required>-->
-<!--                    </div>-->
-<!--                    <div class="row">-->
-<!--                        <div class="col-md-6 mb-3">-->
-<!--                            <label class="form-label">Buy Price</label>-->
-<!--                            <div class="input-group">-->
-<!--                                <span class="input-group-text">$</span>-->
-<!--                                <input type="number" class="form-control" id="buyPrice" step="0.01" required>-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!--                        <div class="col-md-6 mb-3">-->
-<!--                            <label class="form-label">Quantity</label>-->
-<!--                            <input type="number" class="form-control" id="quantity" required>-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                    <div class="mb-3">-->
-<!--                        <label class="form-label">Sector</label>-->
-<!--                        <select class="form-select" id="sector">-->
-<!--                            <option value="Technology">Technology</option>-->
-<!--                            <option value="Finance">Finance</option>-->
-<!--                            <option value="Healthcare">Healthcare</option>-->
-<!--                            <option value="Energy">Energy</option>-->
-<!--                            <option value="Automotive">Automotive</option>-->
-<!--                            <option value="Consumer">Consumer</option>-->
-<!--                            <option value="Other">Other</option>-->
-<!--                        </select>-->
-<!--                    </div>-->
-<!--                    <button type="submit" class="btn btn-primary w-100">Add Investment</button>-->
-<!--                </form>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--    </div>-->
-<!--</div>-->
-
-<!--<div class="modal fade" id="reviewModal" tabindex="-1" data-bs-backdrop="static">-->
-<!--    <div class="modal-dialog modal-lg">-->
-<!--        <div class="modal-content">-->
-<!--            <div class="modal-header bg-light">-->
-<!--                <h5 class="modal-title">Review Data Import</h5>-->
-<!--                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>-->
-<!--            </div>-->
-<!--            <div class="modal-body p-0">-->
-<!--                <div class="alert alert-info m-3 py-2 small">-->
-<!--                    <i class="bi bi-info-circle me-1"></i> Please verify the data below. Missing sectors must be selected.-->
-<!--                </div>-->
-<!--                <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">-->
-<!--                    <table class="table table-striped table-bordered mb-0">-->
-<!--                        <thead class="table-light sticky-top">-->
-<!--                        <tr>-->
-<!--                            <th>Ticker</th>-->
-<!--                            <th style="width: 100px;">Price</th>-->
-<!--                            <th style="width: 80px;">Qty</th>-->
-<!--                            <th>Sector</th>-->
-<!--                            <th style="width: 50px;"></th>-->
-<!--                        </tr>-->
-<!--                        </thead>-->
-<!--                        <tbody id="review-table-body">-->
-<!--                        </tbody>-->
-<!--                    </table>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--            <div class="modal-footer">-->
-<!--                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>-->
-<!--                <button type="button" class="btn btn-success" onclick="confirmBatchUpload()">-->
-<!--                    <i class="bi bi-check-lg"></i> Save All-->
-<!--                </button>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--    </div>-->
-<!--</div>-->
-
-<!--<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>-->
-<!--<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>-->
-<!--<script src="script.js"></script>-->
-<!--</body>-->
-<!--</html>-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>InvestPro | Intelligent Portfolio Manager</title>
+    <title>InvestPro | Intelligent Asset Manager</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="d-flex" id="wrapper">
-    <div class="bg-dark text-white" id="sidebar-wrapper">
-        <div class="sidebar-heading p-4 border-bottom border-secondary">
+
+    <div id="sidebar-wrapper">
+        <div class="sidebar-heading p-4 border-bottom border-secondary text-white">
             <h4 class="fw-bold mb-0"><i class="bi bi-graph-up-arrow me-2"></i>InvestPro</h4>
-            <small class="text-muted" style="font-size: 0.7rem;">INTELLIGENT ASSET MANAGER</small>
+            <small class="opacity-75" style="font-size: 0.7rem;">INTELLIGENT PORTFOLIO</small>
         </div>
         <div class="list-group list-group-flush pt-2">
-            <a href="#" class="list-group-item list-group-item-action bg-dark text-white p-3 active-nav" onclick="showSection('dashboard-view', this)">
+            <a onclick="scrollToSection('section-dashboard')" class="list-group-item list-group-item-action p-3 active-nav">
                 <i class="bi bi-speedometer2 me-3"></i>Dashboard
             </a>
-            <a href="#" class="list-group-item list-group-item-action bg-dark text-white p-3" onclick="showSection('portfolio-view', this)">
-                <i class="bi bi-table me-3"></i>My Portfolio
+            <a onclick="scrollToSection('section-insights')" class="list-group-item list-group-item-action p-3">
+                <i class="bi bi-lightbulb me-3"></i>Insights
             </a>
-            <a href="#" class="list-group-item list-group-item-action bg-dark text-white p-3" onclick="showSection('simulator-view', this)">
-                <i class="bi bi-joystick me-3"></i>Risk Simulator
+            <a onclick="scrollToSection('section-portfolio')" class="list-group-item list-group-item-action p-3">
+                <i class="bi bi-wallet2 me-3"></i>Manage Assets
+            </a>
+            <a onclick="scrollToSection('section-simulator')" class="list-group-item list-group-item-action p-3">
+                <i class="bi bi-shield-check me-3"></i>Risk Health
             </a>
         </div>
     </div>
 
-    <div id="page-content-wrapper" class="w-100 bg-light">
-        <nav class="navbar navbar-light bg-white border-bottom shadow-sm px-4 py-3 mb-4">
-            <span class="navbar-brand mb-0 h1 fw-bold text-secondary" id="page-title">DASHBOARD OVERVIEW</span>
-            <div class="d-flex align-items-center">
-                <div class="me-4 text-end">
-                    <small class="text-muted d-block">Total Portfolio Value</small>
-                    <span id="total-portfolio-value" class="fw-bold text-primary h5">$0.00</span>
-                </div>
-                <button class="btn btn-outline-dark btn-sm" onclick="fetchPortfolio()">
+    <div id="page-content-wrapper">
+
+        <nav class="navbar navbar-expand-lg border-bottom px-4 py-3 mb-4 sticky-top" style="background-color: var(--card-bg);">
+            <span class="navbar-brand mb-0 h1 fw-bold text-secondary">PORTFOLIO OVERVIEW</span>
+
+            <div class="ms-auto d-flex align-items-center">
+                <button class="btn btn-sm btn-outline-secondary me-3" onclick="toggleTheme()" id="theme-btn">
+                    <i class="bi bi-moon-stars-fill"></i>
+                </button>
+
+                <button class="btn btn-outline-primary btn-sm me-2" onclick="document.getElementById('csv-file-input').click()">
+                    <i class="bi bi-upload me-1"></i> Import CSV
+                </button>
+                <input type="file" id="csv-file-input" style="display: none;" onchange="uploadCsv()" accept=".csv">
+
+                <button class="btn btn-outline-dark btn-sm" onclick="fetchDashboardData()">
                     <i class="bi bi-arrow-clockwise me-1"></i> Refresh
                 </button>
             </div>
         </nav>
 
         <div class="container-fluid px-4">
-            <div id="dashboard-view" class="view-section">
-                <div class="row">
-                    <div class="col-md-6 mb-4">
+
+            <div id="section-dashboard" class="mb-5 pt-3">
+                <h5 class="fw-bold mb-3 text-secondary">Performance & Analytics</h5>
+
+                <div class="row mb-4">
+                    <div class="col-md-4">
                         <div class="card shadow-sm h-100">
-                            <div class="card-header bg-white fw-bold">Sector Allocation (Live Value)</div>
                             <div class="card-body">
-                                <canvas id="sectorChart"></canvas>
+                                <h6 class="text-primary small text-uppercase mb-1 fw-bold">Total Value</h6>
+                                <h3 class="fw-bold text-primary" id="total-value">$0.00</h3>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-6 mb-4">
+
+                    <div class="col-md-4">
                         <div class="card shadow-sm h-100">
-                            <div class="card-header bg-white fw-bold">30-Day Performance</div>
+                            <div class="card-body">
+                                <h6 class="text-success small text-uppercase mb-1 fw-bold">Top Sector</h6>
+                                <h3 class="fw-bold text-success" id="top-sector">-</h3>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="card shadow-sm h-100">
+                            <div class="card-body">
+                                <h6 class="text-info small text-uppercase mb-1 fw-bold">Holdings</h6>
+                                <h3 class="fw-bold text-info" id="total-holdings">0</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-8 mb-4">
+                        <div class="card shadow-sm h-100">
+                            <div class="card-header fw-bold">Portfolio Growth</div>
                             <div class="card-body">
                                 <canvas id="historyChart"></canvas>
                             </div>
                         </div>
                     </div>
+                    <div class="col-lg-4 mb-4">
+                        <div class="card shadow-sm h-100">
+                            <div class="card-header fw-bold">Allocation</div>
+                            <div class="card-body">
+                                <canvas id="sectorChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div id="portfolio-view" class="view-section" style="display:none;">
+            <div id="section-insights" class="mb-5 pt-4 border-top">
+                <h5 class="fw-bold mb-3 text-secondary">Smart Advisor</h5>
+
+                <div class="card shadow-sm">
+                    <div class="card-header fw-bold text-primary">
+                        <i class="bi bi-robot me-2"></i>Automated Analysis
+                    </div>
+                    <div class="card-body">
+                        <ul id="advisor-list" class="list-group list-group-flush small"></ul>
+                    </div>
+                </div>
+            </div>
+
+            <div id="section-portfolio" class="mb-5 pt-4 border-top">
+                <h5 class="fw-bold mb-3 text-secondary">Asset Management</h5>
+
                 <div class="row">
-                    <div class="col-md-3 mb-4">
+                    <div class="col-md-4 mb-4">
                         <div class="card shadow-sm">
-                            <div class="card-header bg-primary text-white">Add Asset</div>
+                            <div class="card-header bg-secondary text-white">
+                                <i class="bi bi-plus-circle me-2"></i>Add Asset
+                            </div>
                             <div class="card-body">
                                 <form id="add-form" onsubmit="addInvestment(event)">
-                                    <input type="text" id="ticker" class="form-control mb-2" placeholder="Ticker (AAPL)" required>
-                                    <input type="number" id="buyPrice" class="form-control mb-2" step="0.01" placeholder="Buy Price" required>
-                                    <input type="number" id="quantity" class="form-control mb-2" placeholder="Quantity" required>
-                                    <select id="sector" class="form-select mb-3">
-                                        <option value="Technology">Technology</option>
-                                        <option value="Finance">Finance</option>
-                                        <option value="Healthcare">Healthcare</option>
-                                        <option value="Consumer">Consumer</option>
-                                        <option value="Other">Other</option>
-                                    </select>
-                                    <button type="submit" class="btn btn-primary w-100">Add</button>
+                                    <div class="mb-2">
+                                        <label class="form-label small">Ticker</label>
+                                        <input type="text" id="ticker" class="form-control" placeholder="e.g. MSFT" required>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col">
+                                            <label class="form-label small">Price ($)</label>
+                                            <input type="number" id="buyPrice" class="form-control" step="0.01" required>
+                                        </div>
+                                        <div class="col">
+                                            <label class="form-label small">Qty</label>
+                                            <input type="number" id="quantity" class="form-control" required>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-2">
+                                        <label class="form-label small">Purchase Date</label>
+                                        <input type="date" id="purchaseDate" class="form-control" required>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label small">Sector</label>
+                                        <select id="sector" class="form-select">
+                                            <option value="Technology">Technology</option>
+                                            <option value="Finance">Finance</option>
+                                            <option value="Healthcare">Healthcare</option>
+                                            <option value="Energy">Energy</option>
+                                            <option value="Real Estate">Real Estate</option>
+                                            <option value="Consumer">Consumer</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary w-100">Add to Portfolio</button>
                                 </form>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-9">
+
+                    <div class="col-md-8">
                         <div class="card shadow-sm">
-                            <div class="table-responsive">
-                                <table class="table table-hover align-middle mb-0">
-                                    <thead class="table-light">
-                                    <tr>
-                                        <th>Ticker</th>
-                                        <th>Sector</th>
-                                        <th>Pricing (Buy/Live)</th>
-                                        <th>Qty</th>
-                                        <th>Profit/Loss</th>
-                                        <th class="text-end">Action</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody id="investment-list"></tbody>
-                                </table>
+                            <div class="card-header fw-bold">Current Holdings</div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle mb-0">
+                                        <thead class="table-light">
+                                        <tr>
+                                            <th>Ticker</th>
+                                            <th>Total Qty</th>
+                                            <th>Avg Price</th>
+                                            <th>Current</th>
+                                            <th>P/L</th>
+                                            <th>Trend</th>
+                                            <th></th>
+                                        </tr>
+                                        </thead>
+                                        <tbody id="investment-list">
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div id="empty-table-msg" class="text-center py-5 text-muted" style="display:none;">
+                                    <i class="bi bi-inbox fs-1"></i>
+                                    <p>No assets found.</p>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div id="simulator-view" class="view-section" style="display:none;">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0"><i class="bi bi-joystick me-2"></i>Risk Impact Simulator</h5>
-                        <span class="badge bg-secondary">Pre-Trade Analysis</span>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-4 border-end">
-                                <h6 class="text-muted small fw-bold mb-3 text-uppercase">Proposed Trade</h6>
+            <div id="section-simulator" class="mb-5 pt-4 border-top">
+                <h5 class="fw-bold mb-3 text-secondary">Risk Simulator</h5>
+
+                <div class="row">
+                    <div class="col-md-5">
+                        <div class="card shadow-sm">
+                            <div class="card-header bg-secondary text-white">
+                                <i class="bi bi-joystick me-2"></i>Test Scenario
+                            </div>
+                            <div class="card-body">
                                 <div class="mb-2">
                                     <label class="small text-muted">Stock Ticker</label>
-                                    <input type="text" id="sim-ticker" class="form-control" placeholder="e.g. TSLA">
+                                    <input type="text" id="sim-ticker" class="form-control" placeholder="e.g. NVDA">
                                 </div>
                                 <div class="row mb-2">
                                     <div class="col">
-                                        <label class="small text-muted">Price ($)</label>
+                                        <label class="small text-muted">Price</label>
                                         <input type="number" id="sim-price" class="form-control" placeholder="0.00">
                                     </div>
                                     <div class="col">
@@ -578,56 +230,75 @@
                                     <select class="form-select" id="sim-sector">
                                         <option value="Technology">Technology</option>
                                         <option value="Finance">Finance</option>
-                                        <option value="Automotive">Automotive</option>
-                                        <option value="Healthcare">Healthcare</option>
                                         <option value="Energy">Energy</option>
-                                        <option value="Consumer">Consumer</option>
                                         <option value="Other">Other</option>
                                     </select>
                                 </div>
-                                <button class="btn btn-dark w-100" onclick="runSimulation()">
-                                    <i class="bi bi-play-fill me-1"></i> Run Scenario
-                                </button>
+                                <button class="btn btn-dark w-100" onclick="runSimulation()">Run Health Check</button>
                             </div>
+                        </div>
+                    </div>
 
-                            <div class="col-md-8 ps-md-4">
-                                <div id="sim-empty-state" class="text-center py-5 text-muted">
-                                    <i class="bi bi-activity fs-1 opacity-25"></i>
-                                    <p class="mt-2">Enter trade details to see how it affects your portfolio risk.</p>
+                    <div class="col-md-7">
+                        <div id="sim-results" style="display:none;">
+                            <div class="card mb-3 border-0 shadow-sm">
+                                <div class="card-body d-flex align-items-center">
+                                    <div id="sim-risk-icon-box" class="rounded-circle p-3 me-3 text-white bg-secondary">
+                                        <i id="sim-risk-icon" class="bi bi-shield-check fs-3"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="card-title fw-bold mb-0" id="sim-risk-level">ANALYSIS READY</h5>
+                                        <small class="text-muted" id="sim-risk-msg">...</small>
+                                    </div>
                                 </div>
-
-                                <div id="sim-results" style="display:none;">
-                                    <div class="card mb-4 border-0 shadow-sm bg-light">
-                                        <div class="card-body d-flex align-items-center">
-                                            <div id="sim-risk-icon-box" class="rounded-circle p-3 me-3 text-white bg-success">
-                                                <i id="sim-risk-icon" class="bi bi-shield-check fs-3"></i>
-                                            </div>
-                                            <div>
-                                                <h5 class="card-title fw-bold mb-0" id="sim-risk-level">HEALTHY</h5>
-                                                <small class="text-muted" id="sim-risk-msg">Portfolio is well balanced.</small>
-                                            </div>
-                                        </div>
+                            </div>
+                            <div class="card shadow-sm mb-3">
+                                <div class="card-body">
+                                    <label class="small text-muted fw-bold">HIGHEST CONCENTRATION</label>
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span id="sim-conc-name" class="fw-bold">STOCK</span>
+                                        <span id="sim-conc-val" class="fw-bold">0%</span>
                                     </div>
-
-                                    <div class="mb-4">
-                                        <div class="d-flex justify-content-between mb-1">
-                                            <label class="small text-muted fw-bold">HIGHEST STOCK CONCENTRATION (<span id="sim-conc-name">AAPL</span>)</label>
-                                            <span id="sim-conc-val" class="fw-bold">0%</span>
-                                        </div>
-                                        <div class="progress" style="height: 10px;">
-                                            <div id="sim-conc-bar" class="progress-bar bg-info" role="progressbar" style="width: 0%"></div>
-                                        </div>
-                                        <small class="text-muted" style="font-size:0.7rem">Alert threshold: > 30% exposure to a single asset.</small>
+                                    <div class="progress" style="height: 8px;">
+                                        <div id="sim-conc-bar" class="progress-bar" role="progressbar" style="width: 0%"></div>
                                     </div>
-
-                                    <h6 class="small text-muted fw-bold border-bottom pb-2 text-uppercase">Sector Impact (Before → After)</h6>
-                                    <div id="sector-impact-list" class="mt-2">
-                                    </div>
+                                </div>
+                            </div>
+                            <div class="card shadow-sm">
+                                <div class="card-header fw-bold small">SECTOR IMPACT</div>
+                                <div class="card-body p-0">
+                                    <div id="sector-impact-list" class="list-group list-group-flush"></div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="csvPreviewModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title">CSV Import Preview</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted small">Review and edit values before saving.</p>
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered">
+                        <thead><tr><th>Ticker</th><th>Price</th><th>Qty</th><th>Sector</th></tr></thead>
+                        <tbody id="csv-preview-body">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" onclick="confirmCsvUpload()">Confirm & Save</button>
             </div>
         </div>
     </div>

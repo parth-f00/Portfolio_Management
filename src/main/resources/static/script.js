@@ -1,1006 +1,324 @@
-//// Matches your @RequestMapping("/api/portfolio")
 //const API_URL = "http://localhost:8082/api/portfolio";
 //
-//// ---------------------------------------------------------
-//// 1. MAIN LOAD FUNCTION
-//// ---------------------------------------------------------
-//document.addEventListener("DOMContentLoaded", () => {
-//    loadPortfolioData();      // 1. Table
-//    loadTotalValue();         // 2. Total Value (Separate Endpoint)
-//    loadSectorChart();        // 3. Pie Chart
-//    loadHistoryChart();       // 4. Line Graph
-//    loadAdvisorSuggestions(); // 5. Advisor
-//});
-//
-//// ---------------------------------------------------------
-//// 2. LOAD TABLE (Endpoint: GET /)
-//// ---------------------------------------------------------
-//async function loadPortfolioData() {
-//    try {
-//        const response = await fetch(API_URL + '/');
-//
-//        if (!response.ok) {
-//            throw new Error(`HTTP error! status: ${response.status}`);
-//        }
-//
-//        const stocks = await response.json();
-//        const tableBody = document.getElementById('portfolio-table-body');
-//        tableBody.innerHTML = '';
-//
-//        if (stocks.length === 0) {
-//            tableBody.innerHTML = '<tr><td colspan="6" class="text-center">No stocks found. Add one!</td></tr>';
-//            return;
-//        }
-//
-//        stocks.forEach(stock => {
-//            const currentValue = stock.currentPrice * stock.quantity;
-//
-//            // Logic for Color (Green/Red)
-//            const isProfit = stock.profitLoss >= 0;
-//            const colorClass = isProfit ? 'text-success' : 'text-danger';
-//            const sign = isProfit ? '+' : '';
-//
-//            // --- THE FIX IS IN THE ROW BELOW ---
-//            // We changed stock.percentChange to stock.percentageChange
-//
-//            let trendIcon = '➖'; // Default (Neutral)
-//                let trendClass = 'text-muted'; // Gray
-//
-//                if (stock.trend === 'UP') {
-//                    trendIcon = '📈';
-//                    trendClass = 'text-success'; // Green
-//                } else if (stock.trend === 'DOWN') {
-//                    trendIcon = '📉';
-//                    trendClass = 'text-danger';  // Red
-//                }
-//
-//            const row = `
-//                <tr>
-//                    <td class="fw-bold">${stock.ticker}</td>
-//                    <td>$${stock.currentPrice.toFixed(2)}</td>
-//                    <td class="text-center ${trendClass}" style="font-size: 1.2em;">
-//                        ${trendIcon}
-//                    </td>
-//                    <td>${stock.quantity}</td>
-//                    <td>${formatMoney(currentValue)}</td>
-//                    <td class="${colorClass}">
-//                        ${sign}${stock.profitLoss.toFixed(2)}
-//                        <small>(${stock.percentageChange.toFixed(2)}%)</small>
-//                    </td>
-//                    <td>
-//                        <button class="btn btn-sm btn-outline-danger" onclick="deleteStock(${stock.id})">
-//                            &times; Sell
-//                        </button>
-//                    </td>
-//                </tr>
-//            `;
-//            tableBody.innerHTML += row;
-//        });
-//
-//    } catch (error) {
-//        console.error("Error loading table:", error);
-//        // Show error in table so you know something went wrong
-//        document.getElementById('portfolio-table-body').innerHTML =
-//            `<tr><td colspan="6" class="text-danger text-center">Error loading data. Check Console.</td></tr>`;
-//    }
-//}
-//
-//// ---------------------------------------------------------
-//// 3. LOAD TOTAL VALUE (Endpoint: GET /total-value)
-//// ---------------------------------------------------------
-//async function loadTotalValue() {
-//    try {
-//        // Matches @GetMapping("/total-value")
-//        const response = await fetch(API_URL + '/total-value');
-//        const totalValue = await response.json();
-//
-//        document.getElementById('total-value-display').innerText = formatMoney(totalValue);
-//    } catch (error) {
-//        console.error("Error loading total value:", error);
-//        document.getElementById('total-value-display').innerText = "$0.00";
-//    }
-//}
-//
-//// ---------------------------------------------------------
-//// 4. ADD STOCK (Endpoint: POST /)
-//// ---------------------------------------------------------
-//async function addStock() {
-//    const ticker = document.getElementById('tickerInput').value.toUpperCase();
-//    const price = document.getElementById('buyPriceInput').value;
-//    const quantity = document.getElementById('quantityInput').value;
-//    const sector = document.getElementById('sectorInput').value;
-//
-//    if (!ticker || !price || !quantity) {
-//        alert("Please fill in all fields!");
-//        return;
-//    }
-//
-//    const investmentData = {
-//        ticker: ticker,
-//        buyPrice: parseFloat(price),
-//        quantity: parseInt(quantity),
-//        sector: sector
-//    };
-//
-//    try {
-//        // Matches @PostMapping("/")
-//        const response = await fetch(API_URL + '/', {
-//            method: 'POST',
-//            headers: { 'Content-Type': 'application/json' },
-//            body: JSON.stringify(investmentData)
-//        });
-//
-//        if (response.ok) {
-//            alert("Stock Added Successfully!");
-//            location.reload();
-//        } else {
-//            alert("Failed to add stock.");
-//        }
-//    } catch (error) {
-//        console.error("Error adding stock:", error);
-//    }
-//}
-//
-//// ---------------------------------------------------------
-//// 5. DELETE STOCK (Endpoint: DELETE /{id})
-//// ---------------------------------------------------------
-//async function deleteStock(id) {
-//    if (!confirm("Are you sure you want to sell/delete this stock?")) return;
-//
-//    try {
-//        // Matches @DeleteMapping("/{id}")
-//        const response = await fetch(`${API_URL}/${id}`, {
-//            method: 'DELETE'
-//        });
-//
-//        if (response.ok) {
-//            location.reload();
-//        } else {
-//            alert("Failed to delete.");
-//        }
-//    } catch (error) {
-//        console.error("Error deleting stock:", error);
-//    }
-//}
-//
-//// ---------------------------------------------------------
-//// 6. SECTOR CHART (Endpoint: GET /sector-distrinbution)
-//// ---------------------------------------------------------
-//async function loadSectorChart() {
-//    const ctx = document.getElementById('sectorChart').getContext('2d');
-//
-//    try {
-//        // Matches @GetMapping("/sector-distrinbution") <--- Note your typo in Controller
-//        const response = await fetch(API_URL + '/sector-distrinbution');
-//        const data = await response.json();
-//
-//        new Chart(ctx, {
-//            type: 'doughnut',
-//            data: {
-//                labels: Object.keys(data),
-//                datasets: [{
-//                    data: Object.values(data),
-//                    backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b', '#858796'],
-//                    hoverOffset: 4
-//                }]
-//            },
-//            options: {
-//                maintainAspectRatio: false,
-//                plugins: { legend: { position: 'right' } }
-//            }
-//        });
-//    } catch (error) {
-//        console.error("Error loading sector chart:", error);
-//    }
-//}
-//
-//// ---------------------------------------------------------
-//// 7. HISTORY CHART (Endpoint: GET /history/portfolio)
-//// ---------------------------------------------------------
-//// ---------------------------------------------------------
-//// 7. HISTORY CHART (Interactive Version)
-//// ---------------------------------------------------------
-//async function loadHistoryChart() {
-//    const ctx = document.getElementById('historyChart').getContext('2d');
-//
-//    try {
-//        const response = await fetch(API_URL + '/history/portfolio');
-//        const data = await response.json();
-//
-//        new Chart(ctx, {
-//            type: 'line',
-//            data: {
-//                labels: Object.keys(data), // Dates
-//                datasets: [{
-//                    label: 'Net Worth',
-//                    data: Object.values(data), // Values
-//                    borderColor: '#4e73df',
-//                    backgroundColor: 'rgba(78, 115, 223, 0.1)', // Slight blue fill
-//                    borderWidth: 2,
-//                    fill: true,
-//
-//                    // --- INTERACTIVITY FIXES ---
-//                    tension: 0.3,          // Curvy line
-//                    pointRadius: 4,        // Make points VISIBLE (was 0)
-//                    pointHoverRadius: 7,   // Make points BIGGER when hovered
-//                    pointBackgroundColor: '#fff',
-//                    pointBorderColor: '#4e73df',
-//                    pointBorderWidth: 2
-//                }]
-//            },
-//            options: {
-//                maintainAspectRatio: false,
-//
-//                // 1. Better Interaction (Don't need to hover perfectly on the dot)
-//                interaction: {
-//                    mode: 'index',
-//                    intersect: false,
-//                },
-//
-//                plugins: {
-//                    legend: { display: false },
-//
-//                    // 2. Format the Tooltip to show Currency ($)
-//                    tooltip: {
-//                        callbacks: {
-//                            label: function(context) {
-//                                let label = context.dataset.label || '';
-//                                if (label) {
-//                                    label += ': ';
-//                                }
-//                                if (context.parsed.y !== null) {
-//                                    label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(context.parsed.y);
-//                                }
-//                                return label;
-//                            }
-//                        }
-//                    }
-//                },
-//                scales: {
-//                    x: {
-//                        display: true, // Show dates on X-axis (Optional, change to false if too crowded)
-//                        grid: { display: false },
-//                        ticks: { maxTicksLimit: 7 } // Don't crowd the axis with 100 dates
-//                    },
-//                    y: {
-//                        grid: { borderDash: [2] },
-//                        ticks: {
-//                            // Format Y-axis as Dollars
-//                            callback: function(value) {
-//                                return '$' + value;
-//                            }
-//                        }
-//                    }
-//                },
-//
-//                // 3. (Optional) CLICK EVENT: If you specifically want to click to see a value
-//                onClick: (e, activeElements) => {
-//                    if (activeElements.length > 0) {
-//                        const index = activeElements[0].index;
-//                        const date = Object.keys(data)[index];
-//                        const value = Object.values(data)[index];
-//                        alert(`On ${date}, your portfolio was worth $${value}`);
-//                    }
-//                }
-//            }
-//        });
-//    } catch (error) {
-//        console.error("Error loading history:", error);
-//    }
-//}
-//
-//// ---------------------------------------------------------
-//// 8. ADVISOR (Endpoint: GET /recommendations/portfolio)
-//// ---------------------------------------------------------
-//async function loadAdvisorSuggestions() {
-//    const list = document.getElementById('advisor-list');
-//
-//    try {
-//        // Matches @GetMapping("/recommendations/portfolio")
-//        const response = await fetch(API_URL + '/recommendations/portfolio');
-//        const suggestions = await response.json();
-//
-//        list.innerHTML = '';
-//
-//        suggestions.forEach(msg => {
-//            let colorClass = 'text-dark';
-//
-//            if (msg.includes("⚠️") || msg.includes("Risk")) {
-//                colorClass = 'text-danger fw-bold';
-//            } else if (msg.includes("✅") || msg.includes("Great")) {
-//                colorClass = 'text-success fw-bold';
-//            } else if (msg.includes("🚀")) {
-//                colorClass = 'text-primary fw-bold';
-//            }
-//
-//            const li = `<li class="list-group-item ${colorClass}">${msg}</li>`;
-//            list.innerHTML += li;
-//        });
-//    } catch (error) {
-//        console.error("Error loading advisor:", error);
-//        list.innerHTML = '<li class="list-group-item text-danger">Advisor unavailable</li>';
-//    }
-//}
-//
-//// Helper: Format number as USD Currency
-//function formatMoney(amount) {
-//    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
-//}
-//
-//// Global variable to hold temporary data
-//let previewData = [];
-//
-//// 1. UPLOAD & PREVIEW
-//async function uploadCSV() {
-//    const fileInput = document.getElementById('csvInput');
-//    const file = fileInput.files[0];
-//    if (!file) return;
-//
-//    const formData = new FormData();
-//    formData.append('file', file);
-//
-//    try {
-//        // Call the PREVIEW endpoint
-//        const response = await fetch(API_URL + '/preview-csv', {
-//            method: 'POST',
-//            body: formData
-//        });
-//
-//        if (!response.ok) throw new Error("Failed to parse CSV");
-//
-//        // Get the parsed list from Backend
-//        previewData = await response.json();
-//
-//        // Show the Modal
-//        renderReviewTable();
-//        new bootstrap.Modal(document.getElementById('reviewModal')).show();
-//
-//    } catch (error) {
-//        alert("Error: " + error.message);
-//    }
-//    fileInput.value = ''; // Reset input
-//}
-//
-//// 2. RENDER THE EDITABLE TABLE
-//function renderReviewTable() {
-//    const tbody = document.getElementById('review-table-body');
-//    tbody.innerHTML = '';
-//
-//    previewData.forEach((item, index) => {
-//        const row = `
-//            <tr id="row-${index}">
-//                <td><input type="text" class="form-control form-control-sm" value="${item.ticker}" id="ticker-${index}"></td>
-//                <td><input type="number" class="form-control form-control-sm" value="${item.buyPrice}" id="price-${index}"></td>
-//                <td><input type="number" class="form-control form-control-sm" value="${item.quantity}" id="qty-${index}"></td>
-//                <td>
-//                    <select class="form-select form-select-sm" id="sector-${index}">
-//                        <option value="Technology" ${item.sector === 'Technology' ? 'selected' : ''}>Technology</option>
-//                        <option value="Finance" ${item.sector === 'Finance' ? 'selected' : ''}>Finance</option>
-//                        <option value="Automotive" ${item.sector === 'Automotive' ? 'selected' : ''}>Automotive</option>
-//                        <option value="Healthcare" ${item.sector === 'Healthcare' ? 'selected' : ''}>Healthcare</option>
-//                        <option value="Energy" ${item.sector === 'Energy' ? 'selected' : ''}>Energy</option>
-//                        <option value="Other" ${item.sector === 'Other' || !item.sector ? 'selected' : ''}>Other</option>
-//                    </select>
-//                </td>
-//                <td>
-//                    <button class="btn btn-sm btn-danger" onclick="removePreviewRow(${index})">×</button>
-//                </td>
-//            </tr>
-//        `;
-//        tbody.innerHTML += row;
-//    });
-//}
-//
-//// 3. REMOVE A ROW FROM PREVIEW (If it's junk data)
-//function removePreviewRow(index) {
-//    document.getElementById(`row-${index}`).remove();
-//    // Mark as null so we skip it later
-//    previewData[index] = null;
-//}
-//
-//// 4. SAVE CONFIRMED DATA
-//async function confirmBatchUpload() {
-//    const finalData = [];
-//
-//    // Loop through original size to capture edits
-//    for (let i = 0; i < previewData.length; i++) {
-//        if (previewData[i] === null) continue; // Skip deleted rows
-//
-//        // Grab values from the INPUT fields
-//        const ticker = document.getElementById(`ticker-${i}`).value;
-//        const price = document.getElementById(`price-${i}`).value;
-//        const qty = document.getElementById(`qty-${i}`).value;
-//        const sector = document.getElementById(`sector-${i}`).value;
-//
-//        if(ticker && price && qty) {
-//            finalData.push({
-//                ticker: ticker.toUpperCase(),
-//                buyPrice: parseFloat(price),
-//                quantity: parseInt(qty),
-//                sector: sector
-//            });
-//        }
-//    }
-//
-//    // Send to Batch Save Endpoint
-//    try {
-//        const response = await fetch(API_URL + '/batch', {
-//            method: 'POST',
-//            headers: { 'Content-Type': 'application/json' },
-//            body: JSON.stringify(finalData)
-//        });
-//
-//        if (response.ok) {
-//            alert("Success! Imported " + finalData.length + " stocks.");
-//            location.reload();
-//        } else {
-//            alert("Failed to save data.");
-//        }
-//    } catch (error) {
-//        console.error("Batch save error:", error);
-//    }
-//}
-
-
-
-
-
-//Old version but better
-// Base URL (No trailing slash here, we add it in the calls)
-//const API_URL = "http://localhost:8082/api/portfolio";
-//
-//// Temporary storage for CSV Review
-//let previewData = [];
-//
-//document.addEventListener("DOMContentLoaded", () => {
-//    loadPortfolioData();
-//    loadSectorChart();
-//    loadPerformanceChart();
-//    loadAdvisorSuggestions();
-//});
-//
-//// --- 1. LOAD PORTFOLIO TABLE & STATS ---
-//async function loadPortfolioData() {
-//    try {
-//        console.log("Fetching portfolio...");
-//        // NOTE: Added '/' because your controller has @GetMapping("/")
-//        const response = await fetch(API_URL + '/');
-//
-//        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-//
-//        const data = await response.json();
-//        console.log("Portfolio Data:", data); // Check Console to see if data arrives
-//
-//        const tableBody = document.getElementById('portfolio-table-body');
-//        if (!tableBody) return; // Safety check
-//
-//        tableBody.innerHTML = '';
-//        let totalValue = 0;
-//        let totalPL = 0;
-//
-//        if (!data || data.length === 0) {
-//            tableBody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">No stocks found. Add one to start!</td></tr>';
-//            // Update zero stats
-//            updateStats(0, 0);
-//            return;
-//        }
-//
-//        data.forEach(stock => {
-//            // Safety: Default to 0 if null
-//            const price = stock.currentPrice || 0;
-//            const qty = stock.quantity || 0;
-//            const pnl = stock.profitLoss || 0;
-//            const change = stock.percentageChange || 0;
-//            const ticker = stock.ticker || "UNKNOWN";
-//            const id = stock.id;
-//
-//            // Calculate row value
-//            const currentValue = price * qty;
-//            totalValue += currentValue;
-//            totalPL += pnl;
-//
-//            // Trend Icon Logic
-//            let trendIcon = '➖';
-//            let trendClass = 'text-muted';
-//            if (stock.trend === 'UP') {
-//                trendIcon = '📈';
-//                trendClass = 'text-success';
-//            } else if (stock.trend === 'DOWN') {
-//                trendIcon = '📉';
-//                trendClass = 'text-danger';
-//            }
-//
-//            // Color Logic
-//            const colorClass = pnl >= 0 ? 'text-success' : 'text-danger';
-//            const sign = pnl >= 0 ? '+' : '';
-//
-//            const row = `
-//                <tr>
-//                    <td class="fw-bold">${ticker}</td>
-//                    <td>$${price.toFixed(2)}</td>
-//                    <td class="text-center ${trendClass}" style="font-size: 1.2rem;">${trendIcon}</td>
-//                    <td>${qty}</td>
-//                    <td>${formatMoney(currentValue)}</td>
-//                    <td class="${colorClass}">
-//                        ${sign}${pnl.toFixed(2)}
-//                        <small>(${change.toFixed(2)}%)</small>
-//                    </td>
-//                    <td>
-//                        <button class="btn btn-sm btn-outline-danger" onclick="deleteStock(${id})">
-//                            &times; Sell
-//                        </button>
-//                    </td>
-//                </tr>
-//            `;
-//            tableBody.innerHTML += row;
-//        });
-//
-//        // Update Top Cards
-//        updateStats(totalValue, totalPL);
-//
-//    } catch (error) {
-//        console.error("Error loading portfolio:", error);
-//        document.getElementById('portfolio-table-body').innerHTML =
-//            `<tr><td colspan="7" class="text-danger text-center">Error: ${error.message}</td></tr>`;
-//    }
-//}
-//
-//// Helper to update Top Cards
-//function updateStats(value, pl) {
-//    const valEl = document.getElementById('total-value');
-//    if (valEl) valEl.innerText = formatMoney(value);
-//
-//    const plEl = document.getElementById('total-pl');
-//    if (plEl) {
-//        plEl.innerText = (pl >= 0 ? "+" : "") + formatMoney(pl);
-//        plEl.className = "fw-bold mb-0 " + (pl >= 0 ? "text-success" : "text-danger");
-//    }
-//}
-//
-//// --- 2. ADD STOCK (MANUAL) ---
-//const addStockForm = document.getElementById('addStockForm');
-//if (addStockForm) {
-//    addStockForm.addEventListener('submit', async (e) => {
-//        e.preventDefault();
-//
-//        const stock = {
-//            ticker: document.getElementById('ticker').value.toUpperCase(),
-//            buyPrice: parseFloat(document.getElementById('buyPrice').value),
-//            quantity: parseInt(document.getElementById('quantity').value),
-//            sector: document.getElementById('sector').value
-//        };
-//
-//        try {
-//            // Added '/' to match @PostMapping("/")
-//            const response = await fetch(API_URL + '/', {
-//                method: 'POST',
-//                headers: { 'Content-Type': 'application/json' },
-//                body: JSON.stringify(stock)
-//            });
-//
-//            if (response.ok) {
-//                alert("Stock Added Successfully!");
-//                location.reload();
-//            } else {
-//                alert("Error adding stock");
-//            }
-//        } catch (error) {
-//            console.error("Error:", error);
-//        }
-//    });
-//}
-//
-//// --- 3. DELETE STOCK ---
-//async function deleteStock(id) {
-//    if (!confirm("Are you sure you want to sell this stock?")) return;
-//
-//    try {
-//        await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
-//        loadPortfolioData();
-//        loadSectorChart();
-//        location.reload(); // Refresh to update totals
-//    } catch (error) {
-//        console.error("Error deleting stock:", error);
-//    }
-//}
-//
-//// --- 4. CSV UPLOAD (PREVIEW PHASE) ---
-//async function uploadCSV() {
-//    const fileInput = document.getElementById('csvInput');
-//    const file = fileInput.files[0];
-//    if (!file) return;
-//
-//    const formData = new FormData();
-//    formData.append('file', file);
-//
-//    try {
-//        const response = await fetch(API_URL + '/preview-csv', {
-//            method: 'POST',
-//            body: formData
-//        });
-//
-//        if (!response.ok) throw new Error("Failed to parse CSV");
-//
-//        previewData = await response.json();
-//        renderReviewTable();
-//        new bootstrap.Modal(document.getElementById('reviewModal')).show();
-//
-//    } catch (error) {
-//        alert("Error: " + error.message);
-//    }
-//    fileInput.value = '';
-//}
-//
-//// --- 5. RENDER REVIEW TABLE ---
-//function renderReviewTable() {
-//    const tbody = document.getElementById('review-table-body');
-//    if (!tbody) return;
-//    tbody.innerHTML = '';
-//
-//    previewData.forEach((item, index) => {
-//        if(item === null) return;
-//
-//        const row = `
-//            <tr id="row-${index}">
-//                <td><input type="text" class="form-control form-control-sm" value="${item.ticker}" id="ticker-${index}"></td>
-//                <td><input type="number" class="form-control form-control-sm" value="${item.buyPrice}" id="price-${index}"></td>
-//                <td><input type="number" class="form-control form-control-sm" value="${item.quantity}" id="qty-${index}"></td>
-//                <td>
-//                    <select class="form-select form-select-sm" id="sector-${index}">
-//                        <option value="Technology" ${item.sector === 'Technology' ? 'selected' : ''}>Technology</option>
-//                        <option value="Finance" ${item.sector === 'Finance' ? 'selected' : ''}>Finance</option>
-//                        <option value="Automotive" ${item.sector === 'Automotive' ? 'selected' : ''}>Automotive</option>
-//                        <option value="Healthcare" ${item.sector === 'Healthcare' ? 'selected' : ''}>Healthcare</option>
-//                        <option value="Energy" ${item.sector === 'Energy' ? 'selected' : ''}>Energy</option>
-//                        <option value="Consumer" ${item.sector === 'Consumer' ? 'selected' : ''}>Consumer</option>
-//                        <option value="Other" ${item.sector === 'Other' || !item.sector ? 'selected' : ''}>Other</option>
-//                    </select>
-//                </td>
-//                <td>
-//                    <button class="btn btn-sm btn-danger" onclick="removePreviewRow(${index})">×</button>
-//                </td>
-//            </tr>
-//        `;
-//        tbody.innerHTML += row;
-//    });
-//}
-//
-//function removePreviewRow(index) {
-//    document.getElementById(`row-${index}`).remove();
-//    previewData[index] = null;
-//}
-//
-//// --- 6. CONFIRM BATCH UPLOAD ---
-//async function confirmBatchUpload() {
-//    const finalData = [];
-//
-//    for (let i = 0; i < previewData.length; i++) {
-//        if (previewData[i] === null) continue;
-//
-//        const ticker = document.getElementById(`ticker-${i}`).value;
-//        const price = document.getElementById(`price-${i}`).value;
-//        const qty = document.getElementById(`qty-${i}`).value;
-//        const sector = document.getElementById(`sector-${i}`).value;
-//
-//        if(ticker && price && qty) {
-//            finalData.push({
-//                ticker: ticker.toUpperCase(),
-//                buyPrice: parseFloat(price),
-//                quantity: parseInt(qty),
-//                sector: sector
-//            });
-//        }
-//    }
-//
-//    try {
-//        const response = await fetch(API_URL + '/batch', {
-//            method: 'POST',
-//            headers: { 'Content-Type': 'application/json' },
-//            body: JSON.stringify(finalData)
-//        });
-//
-//        if (response.ok) {
-//            alert("Success! Imported " + finalData.length + " stocks.");
-//            location.reload();
-//        } else {
-//            alert("Failed to save data.");
-//        }
-//    } catch (error) {
-//        console.error("Batch save error:", error);
-//    }
-//}
-//
-//// --- 7. LOAD CHARTS (Corrected URL) ---
-//async function loadSectorChart() {
-//    try {
-//        // NOTE: Matched typo in your Controller: "sector-distrinbution"
-//        const response = await fetch(API_URL + '/sector-distrinbution');
-//
-//        if (!response.ok) throw new Error("Chart data failed");
-//
-//        const data = await response.json();
-//
-//        const canvas = document.getElementById('sectorChart');
-//        if (!canvas) return;
-//
-//        const ctx = canvas.getContext('2d');
-//
-//        // Destroy old chart if exists to prevent overlapping
-//        if (window.mySectorChart) window.mySectorChart.destroy();
-//
-//        window.mySectorChart = new Chart(ctx, {
-//            type: 'doughnut',
-//            data: {
-//                labels: Object.keys(data),
-//                datasets: [{
-//                    data: Object.values(data),
-//                    backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b', '#858796'],
-//                    borderWidth: 1
-//                }]
-//            },
-//            options: {
-//                responsive: true,
-//                maintainAspectRatio: false,
-//                plugins: {
-//                    legend: { position: 'bottom' }
-//                }
-//            }
-//        });
-//    } catch (error) {
-//        console.error("Error loading chart:", error);
-//    }
-//}
-//
-//// --- 8. LOAD ADVISOR (Corrected URL) ---
-//async function loadAdvisorSuggestions() {
-//    try {
-//        // NOTE: Updated URL to match your Controller: "/recommendations/portfolio"
-//        const response = await fetch(API_URL + '/recommendations/portfolio');
-//
-//        if (!response.ok) throw new Error("Advisor failed");
-//
-//        const suggestions = await response.json();
-//
-//        const list = document.getElementById('advisor-list');
-//        if (!list) return;
-//
-//        list.innerHTML = '';
-//
-//        if (suggestions.length === 0) {
-//            list.innerHTML = '<li>No suggestions yet.</li>';
-//            return;
-//        }
-//
-//        suggestions.forEach(suggestion => {
-//            const li = document.createElement('li');
-//            li.textContent = "• " + suggestion;
-//            li.style.marginBottom = "8px";
-//            list.appendChild(li);
-//        });
-//    } catch (error) {
-//        console.error("Error loading advisor:", error);
-//        const list = document.getElementById('advisor-list');
-//        if (list) list.innerHTML = '<li class="text-white-50">Advisor unavailable</li>';
-//    }
-//}
-//
-//// --- 9. LOAD PERFORMANCE CHART (Line Chart) ---
-//async function loadPerformanceChart() {
-//    try {
-//        // Fetch from your endpoint: /history/portfolio
-//        const response = await fetch(API_URL + '/history/portfolio');
-//
-//        if (!response.ok) throw new Error("History data failed");
-//
-//        const data = await response.json();
-//
-//        // Convert Map { "2023-01-01": 150.00 } to Arrays
-//        const labels = Object.keys(data); // Dates
-//        const values = Object.values(data); // Prices
-//
-//        const ctx = document.getElementById('performanceChart').getContext('2d');
-//
-//        // Create a Gradient for the line (Green fade)
-//        const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-//        gradient.addColorStop(0, 'rgba(28, 200, 138, 0.5)'); // Top (Green)
-//        gradient.addColorStop(1, 'rgba(28, 200, 138, 0.0)'); // Bottom (Transparent)
-//
-//        new Chart(ctx, {
-//            type: 'line',
-//            data: {
-//                labels: labels,
-//                datasets: [{
-//                    label: 'Total Portfolio Value ($)',
-//                    data: values,
-//                    borderColor: '#1cc88a', // Green Line
-//                    backgroundColor: gradient, // Gradient Fill
-//                    borderWidth: 2,
-//                    pointRadius: 3,
-//                    pointHoverRadius: 5,
-//                    fill: true, // Fills area under line
-//                    tension: 0.3 // Makes line smooth (curved)
-//                }]
-//            },
-//            options: {
-//                responsive: true,
-//                maintainAspectRatio: false,
-//                plugins: {
-//                    legend: { display: false }, // Hide legend title
-//                    tooltip: {
-//                        callbacks: {
-//                            label: function(context) {
-//                                return '$' + context.parsed.y.toFixed(2);
-//                            }
-//                        }
-//                    }
-//                },
-//                scales: {
-//                    x: {
-//                        grid: { display: false },
-//                        ticks: { maxTicksLimit: 7 } // Show fewer dates
-//                    },
-//                    y: {
-//                        ticks: {
-//                            callback: function(value) { return '$' + value; }
-//                        }
-//                    }
-//                }
-//            }
-//        });
-//
-//    } catch (error) {
-//        console.error("Error loading performance chart:", error);
-//    }
-//}
-//// Helper: Format Money
-//function formatMoney(amount) {
-//    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
-//}
-
-
-
-// --- CONFIGURATION ---
-//const API_URL = "http://localhost:8080/api/investments";
 //let sectorChartInstance = null;
-//let assetChartInstance = null;
+//let historyChartInstance = null;
 //
-//// --- INITIALIZATION ---
+//// --- INIT ---
 //document.addEventListener("DOMContentLoaded", () => {
-//    fetchPortfolio(); // Load data on start
+//    // 1. Dark Mode Init
+//    if(localStorage.getItem('theme') === 'dark') {
+//        document.body.classList.add('dark-mode');
+//        document.getElementById('theme-btn').innerHTML = '<i class="bi bi-sun-fill"></i>';
+//    }
+//
+//    // 2. Set Default Date in Add Form
+//    const dateInput = document.getElementById('purchaseDate');
+//    if(dateInput) {
+//        dateInput.value = new Date().toISOString().split('T')[0];
+//    }
+//
+//    // 3. Fetch Data
+//    fetchDashboardData();
+//    fetchCharts();
+//    fetchAdvisor();
 //});
 //
-//// --- NAVIGATION LOGIC ---
-//function showSection(sectionId, linkElement) {
-//    // 1. Hide all sections
-//    document.querySelectorAll('.view-section').forEach(el => el.style.display = 'none');
-//
-//    // 2. Show selected section
-//    document.getElementById(sectionId).style.display = 'block';
-//
-//    // 3. Update Sidebar Active State
-//    document.querySelectorAll('.list-group-item').forEach(el => el.classList.remove('active-nav'));
-//    linkElement.classList.add('active-nav');
-//
-//    // 4. Update Header
-//    document.getElementById('page-title').innerText = linkElement.innerText.toUpperCase().trim() + " OVERVIEW";
-//}
-//
-//// --- CORE: FETCH DATA ---
-//async function fetchPortfolio() {
-//    try {
-//        const response = await fetch(API_URL);
-//        const data = await response.json();
-//
-//        renderTable(data);
-//        updateCharts(data);
-//    } catch (error) {
-//        console.error("Error fetching data:", error);
+//// --- SCROLL NAVIGATION ---
+//function scrollToSection(id) {
+//    const el = document.getElementById(id);
+//    if(el) {
+//        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+//        // Update Active State
+//        document.querySelectorAll('.list-group-item').forEach(btn => btn.classList.remove('active-nav'));
+//        event.target.classList.add('active-nav');
 //    }
 //}
 //
-//// --- VIEW 1: CHARTS ---
-//function updateCharts(investments) {
-//    if (!investments || investments.length === 0) return;
+//// --- THEME ---
+//function toggleTheme() {
+//    document.body.classList.toggle('dark-mode');
+//    const isDark = document.body.classList.contains('dark-mode');
+//    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+//    document.getElementById('theme-btn').innerHTML = isDark ? '<i class="bi bi-sun-fill"></i>' : '<i class="bi bi-moon-stars-fill"></i>';
 //
-//    // 1. Prepare Data for Sector Chart
-//    const sectorMap = {};
-//    investments.forEach(inv => {
-//        const val = inv.buyPrice * inv.quantity;
-//        sectorMap[inv.sector] = (sectorMap[inv.sector] || 0) + val;
-//    });
-//
-//    const ctx1 = document.getElementById('sectorChart').getContext('2d');
-//    if (sectorChartInstance) sectorChartInstance.destroy(); // Prevent overlap
-//
-//    sectorChartInstance = new Chart(ctx1, {
-//        type: 'doughnut',
-//        data: {
-//            labels: Object.keys(sectorMap),
-//            datasets: [{
-//                data: Object.values(sectorMap),
-//                backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b', '#858796']
-//            }]
-//        }
-//    });
-//
-//    // 2. Prepare Data for Asset Chart (Top 5 Assets)
-//    const sortedAssets = [...investments].sort((a,b) => (b.buyPrice*b.quantity) - (a.buyPrice*a.quantity)).slice(0,5);
-//    const ctx2 = document.getElementById('assetChart').getContext('2d');
-//    if (assetChartInstance) assetChartInstance.destroy();
-//
-//    assetChartInstance = new Chart(ctx2, {
-//        type: 'bar',
-//        data: {
-//            labels: sortedAssets.map(i => i.ticker),
-//            datasets: [{
-//                label: 'Asset Value ($)',
-//                data: sortedAssets.map(i => i.buyPrice * i.quantity),
-//                backgroundColor: '#4e73df'
-//            }]
-//        }
-//    });
+//    // Force Chart Re-render with new colors
+//    fetchCharts();
 //}
 //
-//// --- VIEW 2: TABLE & CRUD ---
-//function renderTable(investments) {
+//// --- DATA FETCHING ---
+//async function fetchDashboardData() {
+//    try {
+//        const valRes = await fetch(`${API_URL}/total-value`);
+//        const totalVal = await valRes.json();
+//        document.getElementById('total-value').innerText = formatMoney(totalVal);
+//
+//        const res = await fetch(`${API_URL}/`);
+//        const data = await res.json();
+//
+//        document.getElementById('total-holdings').innerText = data.length;
+//        renderGroupedTable(data);
+//
+//        const secRes = await fetch(`${API_URL}/sector-distrinbution`);
+//        const secData = await secRes.json();
+//        let topSec = "-";
+//        let maxVal = 0;
+//        for (const [sec, val] of Object.entries(secData)) {
+//            if (val > maxVal) { maxVal = val; topSec = sec; }
+//        }
+//        document.getElementById('top-sector').innerText = topSec;
+//
+//    } catch (e) { console.error("Error fetching dashboard:", e); }
+//}
+//
+//// --- GROUPED TABLE RENDER ---
+//function renderGroupedTable(investments) {
 //    const list = document.getElementById('investment-list');
 //    const emptyMsg = document.getElementById('empty-table-msg');
 //    list.innerHTML = '';
 //
-//    if (investments.length === 0) {
+//    if (!investments || investments.length === 0) {
 //        emptyMsg.style.display = 'block';
 //        return;
 //    }
 //    emptyMsg.style.display = 'none';
 //
+//    const groups = {};
 //    investments.forEach(inv => {
-//        const total = (inv.buyPrice * inv.quantity).toFixed(2);
-//        const row = `
-//            <tr>
-//                <td class="fw-bold">${inv.ticker}</td>
-//                <td><span class="badge bg-light text-dark border">${inv.sector}</span></td>
-//                <td>$${inv.buyPrice}</td>
-//                <td>${inv.quantity}</td>
-//                <td class="text-success fw-bold">$${total}</td>
-//                <td class="text-end">
-//                    <button class="btn btn-sm btn-outline-danger" onclick="deleteInvestment(${inv.id})">
-//                        <i class="bi bi-trash"></i>
-//                    </button>
+//        if (!groups[inv.ticker]) {
+//            groups[inv.ticker] = {
+//                ticker: inv.ticker,
+//                sector: inv.sector,
+//                currentPrice: inv.currentPrice,
+//                trend: inv.trend,
+//                totalQty: 0,
+//                totalInvested: 0,
+//                totalPL: 0,
+//                entries: []
+//            };
+//        }
+//        const g = groups[inv.ticker];
+//        g.totalQty += inv.quantity;
+//        g.totalInvested += (inv.buyPrice * inv.quantity);
+//        g.totalPL += inv.profitLoss;
+//        g.entries.push(inv);
+//    });
+//
+//    Object.values(groups).forEach(group => {
+//        const avgPrice = group.totalInvested / group.totalQty;
+//        const plColor = group.totalPL >= 0 ? 'text-success' : 'text-danger';
+//        const trendIcon = group.trend === 'UP' ? '<i class="bi bi-arrow-up-circle-fill text-success"></i>' : (group.trend === 'DOWN' ? '<i class="bi bi-arrow-down-circle-fill text-danger"></i>' : '<i class="bi bi-dash-circle text-muted"></i>');
+//        const collapseId = `collapse-${group.ticker}`;
+//
+//        const parentRow = `
+//            <tr class="clickable-row fw-bold" onclick="toggleCollapse('${collapseId}', this)">
+//                <td>${group.ticker} <span class="badge bg-light text-dark border ms-1">${group.sector}</span></td>
+//                <td>${group.totalQty}</td>
+//                <td>${formatMoney(avgPrice)}</td>
+//                <td>${formatMoney(group.currentPrice)}</td>
+//                <td class="${plColor}">${formatMoney(group.totalPL)}</td>
+//                <td class="fs-5">${trendIcon}</td>
+//                <td><i class="bi bi-chevron-down text-muted transition-icon"></i></td>
+//            </tr>
+//        `;
+//
+//        let childRows = '';
+//        group.entries.forEach(inv => {
+//            // FIX: Format Date nicely
+//            let dateStr = 'N/A';
+//            if (inv.purchaseDate) {
+//                const d = new Date(inv.purchaseDate);
+//                dateStr = `${d.getMonth()+1}-${d.getDate()}-${d.getFullYear()}`;
+//            }
+//
+//             childRows += `
+//                <tr>
+//                    <td class="text-muted small ps-4"><i class="bi bi-arrow-return-right"></i> Buy: ${formatMoney(inv.buyPrice)}</td>
+//                    <td class="text-muted small">Qty: ${inv.quantity}</td>
+//                    <td class="text-muted small">Date: ${dateStr}</td>
+//                    <td class="text-muted small"></td>
+//                    <td class="text-muted small"></td>
+//                    <td class="text-muted small"></td>
+//                    <td class="text-end">
+//                        <button class="btn btn-sm btn-outline-danger border-0 p-0" onclick="deleteInvestment(${inv.id})">
+//                            <i class="bi bi-x-circle"></i> Remove
+//                        </button>
+//                    </td>
+//                </tr>
+//             `;
+//        });
+//
+//        const detailContainer = `
+//            <tr id="${collapseId}" style="display:none;" class="bg-light">
+//                <td colspan="7" class="p-0">
+//                    <table class="table table-sm mb-0">
+//                       ${childRows}
+//                    </table>
 //                </td>
 //            </tr>
 //        `;
-//        list.innerHTML += row;
+//        list.innerHTML += parentRow + detailContainer;
 //    });
 //}
 //
-//async function addInvestment(event) {
-//    event.preventDefault();
-//    const investment = {
+//function toggleCollapse(id, rowElement) {
+//    const el = document.getElementById(id);
+//    const icon = rowElement.querySelector('.bi-chevron-down, .bi-chevron-up');
+//
+//    if (el.style.display === "none") {
+//        el.style.display = "table-row";
+//        rowElement.classList.add("expanded-row");
+//        if(icon) { icon.classList.remove('bi-chevron-down'); icon.classList.add('bi-chevron-up'); }
+//    } else {
+//        el.style.display = "none";
+//        rowElement.classList.remove("expanded-row");
+//        if(icon) { icon.classList.remove('bi-chevron-up'); icon.classList.add('bi-chevron-down'); }
+//    }
+//}
+//
+//// --- CHARTS (With Formatted Dates) ---
+//async function fetchCharts() {
+//    const secRes = await fetch(`${API_URL}/sector-distrinbution`);
+//    const secData = await secRes.json();
+//    const ctx1 = document.getElementById('sectorChart').getContext('2d');
+//    if (sectorChartInstance) sectorChartInstance.destroy();
+//    sectorChartInstance = new Chart(ctx1, {
+//        type: 'doughnut',
+//        data: {
+//            labels: Object.keys(secData),
+//            datasets: [{
+//                data: Object.values(secData),
+//                backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b']
+//            }]
+//        }
+//    });
+//
+//    const histRes = await fetch(`${API_URL}/history/portfolio`);
+//    const histData = await histRes.json();
+//    const ctx2 = document.getElementById('historyChart').getContext('2d');
+//    if (historyChartInstance) historyChartInstance.destroy();
+//
+//    historyChartInstance = new Chart(ctx2, {
+//        type: 'line',
+//        data: {
+//            labels: Object.keys(histData),
+//            datasets: [{
+//                label: 'Value',
+//                data: Object.values(histData),
+//                borderColor: '#4e73df',
+//                tension: 0.3,
+//                fill: true,
+//                backgroundColor: 'rgba(78, 115, 223, 0.05)'
+//            }]
+//        },
+//        options: {
+//            scales: {
+//                x: {
+//                    ticks: {
+//                        // FIX: Format Dates to MM-DD-YYYY
+//                        callback: function(val, index) {
+//                            const label = this.getLabelForValue(val);
+//                            const d = new Date(label);
+//                            return `${d.getMonth()+1}-${d.getDate()}-${d.getFullYear()}`;
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    });
+//}
+//
+//async function fetchAdvisor() {
+//    const res = await fetch(`${API_URL}/recommendations/portfolio`);
+//    const suggestions = await res.json();
+//    const list = document.getElementById('advisor-list');
+//    list.innerHTML = "";
+//    suggestions.forEach(s => {
+//        list.innerHTML += `<li class="list-group-item"><i class="bi bi-check2-circle text-primary me-2"></i>${s}</li>`;
+//    });
+//}
+//
+//// --- CRUD ---
+//async function addInvestment(e) {
+//    e.preventDefault();
+//    const payload = {
 //        ticker: document.getElementById('ticker').value.toUpperCase(),
 //        buyPrice: parseFloat(document.getElementById('buyPrice').value),
 //        quantity: parseInt(document.getElementById('quantity').value),
-//        sector: document.getElementById('sector').value
+//        sector: document.getElementById('sector').value,
+//        purchaseDate: document.getElementById('purchaseDate').value + "T00:00:00" // Append time for backend
 //    };
-//
-//    await fetch(API_URL, {
+//    await fetch(API_URL + "/", {
 //        method: 'POST',
 //        headers: { 'Content-Type': 'application/json' },
-//        body: JSON.stringify(investment)
+//        body: JSON.stringify(payload)
 //    });
-//
+//    alert("Asset Added!");
 //    document.getElementById('add-form').reset();
-//    fetchPortfolio(); // Refresh UI
-//    alert("Investment Added!");
+//    document.getElementById('purchaseDate').value = new Date().toISOString().split('T')[0];
+//    fetchDashboardData();
+//    fetchCharts();
 //}
 //
 //async function deleteInvestment(id) {
-//    if(!confirm("Are you sure?")) return;
-//
+//    if (!confirm("Remove this entry?")) return;
 //    await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
-//    fetchPortfolio();
+//    fetchDashboardData();
+//    fetchCharts();
 //}
 //
-//// --- VIEW 3: SIMULATOR (ENDPOINT: /api/investments/simulate) ---
+//// --- CSV UPLOAD (EDITABLE) ---
+//async function uploadCsv() {
+//    const fileInput = document.getElementById('csv-file-input');
+//    const file = fileInput.files[0];
+//    if (!file) return;
+//
+//    const formData = new FormData();
+//    formData.append("file", file);
+//    const res = await fetch(`${API_URL}/preview-csv`, { method: 'POST', body: formData });
+//    const rawList = await res.json();
+//
+//    const tbody = document.getElementById('csv-preview-body');
+//    tbody.innerHTML = "";
+//
+//    // Render INPUT fields instead of plain text
+//    rawList.forEach((inv, index) => {
+//        tbody.innerHTML += `
+//            <tr data-index="${index}">
+//                <td><input type="text" class="form-control form-control-sm csv-ticker" value="${inv.ticker}"></td>
+//                <td><input type="number" class="form-control form-control-sm csv-price" value="${inv.buyPrice}"></td>
+//                <td><input type="number" class="form-control form-control-sm csv-qty" value="${inv.quantity}"></td>
+//                <td><input type="text" class="form-control form-control-sm csv-sector" value="${inv.sector}"></td>
+//            </tr>`;
+//    });
+//
+//    const modal = new bootstrap.Modal(document.getElementById('csvPreviewModal'));
+//    modal.show();
+//}
+//
+//async function confirmCsvUpload() {
+//    // 1. Scrape data from the EDITABLE table
+//    const rows = document.querySelectorAll('#csv-preview-body tr');
+//    const finalData = Array.from(rows).map(row => {
+//        return {
+//            ticker: row.querySelector('.csv-ticker').value.toUpperCase(),
+//            buyPrice: parseFloat(row.querySelector('.csv-price').value),
+//            quantity: parseInt(row.querySelector('.csv-qty').value),
+//            sector: row.querySelector('.csv-sector').value
+//        };
+//    });
+//
+//    // 2. Send to Backend
+//    await fetch(`${API_URL}/batch`, {
+//        method: 'POST',
+//        headers: { 'Content-Type': 'application/json' },
+//        body: JSON.stringify(finalData)
+//    });
+//
+//    alert("Batch Upload Successful!");
+//    location.reload();
+//}
+//
+//// --- SIMULATOR ---
 //async function runSimulation() {
 //    const trade = {
 //        ticker: document.getElementById('sim-ticker').value.toUpperCase(),
@@ -1008,280 +326,536 @@
 //        quantity: parseInt(document.getElementById('sim-qty').value),
 //        sector: document.getElementById('sim-sector').value
 //    };
+//    const res = await fetch(`${API_URL}/simulate`, {
+//        method: 'POST',
+//        headers: { 'Content-Type': 'application/json' },
+//        body: JSON.stringify(trade)
+//    });
+//    const data = await res.json();
 //
-//    if (!trade.ticker || !trade.buyPrice) {
-//        alert("Please enter valid details"); return;
+//    document.getElementById('sim-results').style.display = 'block';
+//
+//    const riskBadge = document.getElementById('sim-risk-icon-box');
+//    const riskTitle = document.getElementById('sim-risk-level');
+//    if (data.riskLevel === 'HIGH') {
+//        riskBadge.className = "rounded-circle p-3 me-3 text-white bg-danger";
+//        riskTitle.innerText = "HIGH RISK";
+//    } else if (data.riskLevel === 'MEDIUM') {
+//        riskBadge.className = "rounded-circle p-3 me-3 text-dark bg-warning";
+//        riskTitle.innerText = "MEDIUM RISK";
+//    } else {
+//        riskBadge.className = "rounded-circle p-3 me-3 text-white bg-success";
+//        riskTitle.innerText = "HEALTHY";
 //    }
+//    document.getElementById('sim-risk-msg').innerText = data.riskMessage;
 //
-//    try {
-//        const response = await fetch(`${API_URL}/simulate`, {
-//            method: 'POST',
-//            headers: { 'Content-Type': 'application/json' },
-//            body: JSON.stringify(trade)
-//        });
+//    const conc = data.highestStockPct;
+//    document.getElementById('sim-conc-name').innerText = data.highestStockTicker;
+//    document.getElementById('sim-conc-val').innerText = conc.toFixed(1) + "%";
+//    document.getElementById('sim-conc-bar').style.width = conc + "%";
+//    document.getElementById('sim-conc-bar').className = conc > 30 ? "progress-bar bg-danger" : "progress-bar bg-info";
 //
-//        const data = await response.json();
-//
-//        // Update UI
-//        document.getElementById('sim-empty-state').style.display = 'none';
-//        document.getElementById('sim-results').style.display = 'block';
-//
-//        document.getElementById('sim-cur-val').innerText = formatMoney(data.currentTotalValue);
-//        document.getElementById('sim-new-val').innerText = formatMoney(data.simulatedTotalValue);
-//
-//        const diff = data.valueDifference;
-//        const diffEl = document.getElementById('sim-diff');
-//        diffEl.innerText = (diff >= 0 ? "+" : "") + formatMoney(diff);
-//        diffEl.className = diff >= 0 ? "fs-5 fw-bold text-success" : "fs-5 fw-bold text-danger";
-//
-//        // Risk Badge
-//        const riskBadge = document.getElementById('sim-risk-alert');
-//        const riskIcon = document.getElementById('sim-risk-icon');
-//        const riskTxt = document.getElementById('sim-risk-level');
-//
-//        if(data.riskLevel === 'HIGH') {
-//            riskBadge.className = "alert alert-danger d-flex align-items-center mb-4";
-//            riskIcon.className = "bi bi-exclamation-triangle-fill fs-3 me-3";
-//            riskTxt.innerText = "RISK: HIGH";
-//        } else if (data.riskLevel === 'MEDIUM') {
-//            riskBadge.className = "alert alert-warning d-flex align-items-center mb-4";
-//            riskIcon.className = "bi bi-exclamation-circle-fill fs-3 me-3";
-//            riskTxt.innerText = "RISK: MEDIUM";
-//        } else {
-//            riskBadge.className = "alert alert-success d-flex align-items-center mb-4";
-//            riskIcon.className = "bi bi-shield-check fs-3 me-3";
-//            riskTxt.innerText = "RISK: LOW";
+//    const list = document.getElementById('sector-impact-list');
+//    list.innerHTML = "";
+//    const allSec = new Set([...Object.keys(data.oldSectorAllocation), ...Object.keys(data.newSectorAllocation)]);
+//    allSec.forEach(sec => {
+//        const oldP = data.oldSectorAllocation[sec] || 0;
+//        const newP = data.newSectorAllocation[sec] || 0;
+//        if(Math.abs(newP - oldP) > 0.1) {
+//             list.innerHTML += `<div class="list-group-item d-flex justify-content-between"><span class="small">${sec}</span><span class="small fw-bold">${oldP.toFixed(1)}% <i class="bi bi-arrow-right"></i> ${newP.toFixed(1)}%</span></div>`;
 //        }
-//        document.getElementById('sim-risk-msg').innerText = data.riskMessage;
-//
-//        // Concentration Bar
-//        const conc = data.highestStockPct || 0;
-//        document.getElementById('sim-conc-val').innerText = conc.toFixed(1) + "%";
-//        const bar = document.getElementById('sim-conc-bar');
-//        bar.style.width = conc + "%";
-//        bar.className = conc > 25 ? "progress-bar bg-danger" : "progress-bar bg-info";
-//
-//    } catch (e) {
-//        console.error(e);
-//        alert("Simulation failed.");
-//    }
+//    });
 //}
 //
-//function formatMoney(num) {
-//    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(num);
+//function formatMoney(amount) {
+//    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
 //}
 
-// --- CONFIGURATION ---
-// 1. Pointing to your specific controller RequestMapping
-// --- CONFIGURATION ---
-// CHECK YOUR PORT: Ensure your Spring Boot runs on 8082. If it's 8080, change this.
-// --- CONFIGURATION ---
-const BASE_URL = "http://localhost:8082/api/portfolio";
+const API_URL = "http://localhost:8082/api/portfolio";
 
-// Global Chart Instances to prevent "ReferenceError" and "Canvas already in use" errors
 let sectorChartInstance = null;
 let historyChartInstance = null;
 
-// --- INITIAL LOAD ---
+// --- INIT ---
 document.addEventListener("DOMContentLoaded", () => {
-    console.log("App Started. Testing connection to:", BASE_URL);
-    fetchPortfolio();
-    // Load advisor suggestions on start too
-    loadAdvisorSuggestions();
+    // 1. Dark Mode Init
+    if(localStorage.getItem('theme') === 'dark') {
+        document.body.classList.add('dark-mode');
+        document.getElementById('theme-btn').innerHTML = '<i class="bi bi-sun-fill"></i>';
+        Chart.defaults.color = '#e0e0e0';
+        Chart.defaults.borderColor = '#444';
+    } else {
+        Chart.defaults.color = '#666';
+        Chart.defaults.borderColor = '#ddd';
+    }
+
+    // 2. Set Default Date in Add Form
+    const dateInput = document.getElementById('purchaseDate');
+    if(dateInput) {
+        dateInput.value = new Date().toISOString().split('T')[0];
+    }
+
+    // 3. Fetch Data
+    fetchDashboardData();
+    fetchCharts();
+    fetchAdvisor();
+
+    // 4. SCROLL SPY (New Feature)
+    initScrollSpy();
 });
 
+// --- NEW: SCROLL SPY LOGIC ---
+// --- NEW: SCROLL SPY LOGIC (FIXED) ---
+// --- NEW: ROBUST SCROLL SPY ---
+function initScrollSpy() {
+    const sections = document.querySelectorAll('div[id^="section-"]');
+    const navLinks = document.querySelectorAll('.list-group-item');
+
+    // Options: Trigger whenever any part of the target is visible
+    const options = {
+        root: null,
+        rootMargin: '0px',
+        threshold: [0, 0.25, 0.5, 0.75, 1] // Check continuously as visibility changes
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        // 1. We don't just check one entry; we check ALL sections to see who wins
+        let maxRatio = 0;
+        let activeId = '';
+
+        // Check every section's current visibility on screen
+        sections.forEach(section => {
+            const rect = section.getBoundingClientRect();
+            const visibleHeight = Math.min(window.innerHeight, rect.bottom) - Math.max(0, rect.top);
+
+            // Calculate how much screen height this section occupies
+            // Using a simple heuristic: visible pixels
+            if (visibleHeight > 0) {
+                // If it takes up more pixels than the previous winner, it's the new active one
+                // We add a small buffer (50px) to bias towards the top section slightly
+                if (visibleHeight > maxRatio) {
+                    maxRatio = visibleHeight;
+                    activeId = section.id;
+                }
+            }
+        });
+
+        // 2. If we found a winner, update the sidebar
+        if (activeId) {
+            navLinks.forEach(link => {
+                link.classList.remove('active-nav');
+                // Robust matching: Check if the onclick string contains the ID
+                const onclickVal = link.getAttribute('onclick');
+                if (onclickVal && onclickVal.includes(activeId)) {
+                    link.classList.add('active-nav');
+                }
+            });
+        }
+    }, options);
+
+    sections.forEach(section => observer.observe(section));
+
+    // Also attach a standard scroll listener as a backup fallback
+    // This ensures that when you stop scrolling, the calculation runs one last time
+    window.addEventListener('scroll', () => {
+         // (Optional) We can throttle this if needed, but for simple apps it's fine
+         // This just triggers the logic above implicitly via the observer loop
+    }, { passive: true });
+}
+
 // --- NAVIGATION ---
-function showSection(sectionId, linkElement) {
-    document.querySelectorAll('.view-section').forEach(el => el.style.display = 'none');
-    document.getElementById(sectionId).style.display = 'block';
-    document.querySelectorAll('.list-group-item').forEach(el => el.classList.remove('active-nav'));
-    linkElement.classList.add('active-nav');
-    document.getElementById('page-title').innerText = linkElement.innerText.toUpperCase().trim();
+function scrollToSection(id) {
+    const el = document.getElementById(id);
+    if(el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
+
+// --- THEME TOGGLE ---
+function toggleTheme() {
+    document.body.classList.toggle('dark-mode');
+    const isDark = document.body.classList.contains('dark-mode');
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    document.getElementById('theme-btn').innerHTML = isDark ? '<i class="bi bi-sun-fill"></i>' : '<i class="bi bi-moon-stars-fill"></i>';
+
+    // Force Chart Re-render
+    fetchCharts();
 }
 
 // --- DATA FETCHING ---
-async function fetchPortfolio() {
-    // 1. Fetch Main Table Data
+async function fetchDashboardData() {
     try {
-        const res = await fetch(`${BASE_URL}/`);
-        if (!res.ok) throw new Error("Portfolio endpoint returned " + res.status);
+        const valRes = await fetch(`${API_URL}/total-value`);
+        const totalVal = await valRes.json();
+        document.getElementById('total-value').innerText = formatMoney(totalVal);
+
+        const res = await fetch(`${API_URL}/`);
         const data = await res.json();
-        renderTable(data);
-        updateSectorChart(data);
-    } catch (err) {
-        console.error("CRITICAL: Failed to load portfolio table:", err);
-    }
 
-    // 2. Fetch Total Value
-    try {
-        const res = await fetch(`${BASE_URL}/total-value`);
-        const total = await res.json();
-        const totalEl = document.getElementById('total-portfolio-value');
-        if (totalEl) totalEl.innerText = formatMoney(total);
-    } catch (err) {
-        console.warn("Minor: Failed to load total value.");
-    }
+        document.getElementById('total-holdings').innerText = data.length;
+        renderGroupedTable(data);
 
-    // 3. Fetch History
-    try {
-        const res = await fetch(`${BASE_URL}/history/portfolio`);
-        const historyData = await res.json();
-        updateHistoryChart(historyData);
-    } catch (err) {
-        console.warn("Minor: Failed to load history chart.");
-    }
+        const secRes = await fetch(`${API_URL}/sector-distrinbution`);
+        const secData = await secRes.json();
+        let topSec = "-";
+        let maxVal = 0;
+        for (const [sec, val] of Object.entries(secData)) {
+            if (val > maxVal) { maxVal = val; topSec = sec; }
+        }
+        document.getElementById('top-sector').innerText = topSec;
+
+    } catch (e) { console.error("Error fetching dashboard:", e); }
 }
 
-// --- UI RENDERING ---
-function renderTable(investments) {
+function renderGroupedTable(investments) {
     const list = document.getElementById('investment-list');
-    if (!list) return;
+    const emptyMsg = document.getElementById('empty-table-msg');
     list.innerHTML = '';
 
+    if (!investments || investments.length === 0) {
+        emptyMsg.style.display = 'block';
+        return;
+    }
+    emptyMsg.style.display = 'none';
+
+    const groups = {};
     investments.forEach(inv => {
-        const currentPrice = inv.currentPrice || inv.buyPrice || 0;
-        const pl = inv.profitLoss || 0;
-        const pct = inv.percentageChange || 0;
-        const trendIcon = inv.trend === "UP" ? "bi-caret-up-fill text-success" : "bi-caret-down-fill text-danger";
-
-        list.innerHTML += `
-            <tr>
-                <td class="fw-bold">${inv.ticker} <i class="bi ${trendIcon}"></i></td>
-                <td><span class="badge bg-light text-dark border">${inv.sector}</span></td>
-                <td>
-                    <div class="small text-muted">Buy: $${inv.buyPrice.toFixed(2)}</div>
-                    <div class="fw-bold">Live: $${currentPrice.toFixed(2)}</div>
-                </td>
-                <td>${inv.quantity}</td>
-                <td>
-                    <div class="${pl >= 0 ? 'text-success' : 'text-danger'} fw-bold">${formatMoney(pl)}</div>
-                    <small class="${pl >= 0 ? 'text-success' : 'text-danger'}">${pct.toFixed(2)}%</small>
-                </td>
-                <td class="text-end">
-                    <button class="btn btn-sm btn-outline-danger" onclick="deleteInvestment(${inv.id})">
-                        <i class="bi bi-trash"></i>
-                    </button>
-                </td>
-            </tr>`;
-    });
-}
-
-// --- CHARTING ---
-function updateSectorChart(investments) {
-    const sectorMap = {};
-    investments.forEach(inv => {
-        const val = (inv.currentPrice || inv.buyPrice) * inv.quantity;
-        sectorMap[inv.sector] = (sectorMap[inv.sector] || 0) + val;
-    });
-
-    const canvas = document.getElementById('sectorChart');
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    if (sectorChartInstance) sectorChartInstance.destroy();
-
-    sectorChartInstance = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: Object.keys(sectorMap),
-            datasets: [{
-                data: Object.values(sectorMap),
-                backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b']
-            }]
-        },
-        options: {
-            maintainAspectRatio: false,
-            cutout: '70%'
+        if (!groups[inv.ticker]) {
+            groups[inv.ticker] = {
+                ticker: inv.ticker,
+                sector: inv.sector,
+                currentPrice: inv.currentPrice,
+                trend: inv.trend,
+                totalQty: 0,
+                totalInvested: 0,
+                totalPL: 0,
+                entries: []
+            };
         }
+        const g = groups[inv.ticker];
+        g.totalQty += inv.quantity;
+        g.totalInvested += (inv.buyPrice * inv.quantity);
+        g.totalPL += inv.profitLoss;
+        g.entries.push(inv);
     });
-}
 
-function updateHistoryChart(historyData) {
-    const labels = Object.keys(historyData).map(d => d.split('T')[0]);
-    const values = Object.values(historyData);
+    Object.values(groups).forEach(group => {
+        const avgPrice = group.totalInvested / group.totalQty;
+        const plColor = group.totalPL >= 0 ? 'text-success' : 'text-danger';
+        const trendIcon = group.trend === 'UP' ? '<i class="bi bi-arrow-up-circle-fill text-success"></i>' : (group.trend === 'DOWN' ? '<i class="bi bi-arrow-down-circle-fill text-danger"></i>' : '<i class="bi bi-dash-circle text-muted"></i>');
+        const collapseId = `collapse-${group.ticker}`;
 
-    const canvas = document.getElementById('historyChart');
-    if (!canvas) return;
+        const parentRow = `
+            <tr class="clickable-row fw-bold" onclick="toggleCollapse('${collapseId}', this)">
+                <td>${group.ticker} <span class="badge bg-light text-dark border ms-1">${group.sector}</span></td>
+                <td>${group.totalQty}</td>
+                <td>${formatMoney(avgPrice)}</td>
+                <td>${formatMoney(group.currentPrice)}</td>
+                <td class="${plColor}">${formatMoney(group.totalPL)}</td>
+                <td class="fs-5">${trendIcon}</td>
+                <td><i class="bi bi-chevron-down text-muted transition-icon"></i></td>
+            </tr>
+        `;
 
-    const ctx = canvas.getContext('2d');
-    if (historyChartInstance) historyChartInstance.destroy();
+        let childRows = '';
+        group.entries.forEach(inv => {
+            let dateStr = 'N/A';
+            if (inv.purchaseDate) {
+                if (Array.isArray(inv.purchaseDate)) {
+                    dateStr = `${inv.purchaseDate[1]}-${inv.purchaseDate[2]}-${inv.purchaseDate[0]}`;
+                } else {
+                    const d = new Date(inv.purchaseDate);
+                    dateStr = `${d.getMonth()+1}-${d.getDate()}-${d.getFullYear()}`;
+                }
+            }
 
-    historyChartInstance = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Portfolio Value',
-                data: values,
-                borderColor: '#4e73df',
-                fill: true,
-                backgroundColor: 'rgba(78, 115, 223, 0.1)',
-                tension: 0.3
-            }]
-        },
-        options: {
-            maintainAspectRatio: false
-        }
-    });
-}
-
-// --- ADVISOR ---
-async function loadAdvisorSuggestions() {
-    try {
-        const response = await fetch(`${BASE_URL}/recommendations/portfolio`);
-        const suggestions = await response.json();
-        const list = document.getElementById('advisor-list');
-        if (!list) return;
-
-        list.innerHTML = '';
-        suggestions.forEach(msg => {
-            const li = document.createElement('li');
-            li.className = "list-group-item small";
-            li.textContent = msg;
-            list.appendChild(li);
+             childRows += `
+                <tr>
+                    <td class="text-muted small ps-4"><i class="bi bi-arrow-return-right"></i> Buy: ${formatMoney(inv.buyPrice)}</td>
+                    <td class="text-muted small">Qty: ${inv.quantity}</td>
+                    <td class="text-muted small">Date: ${dateStr}</td>
+                    <td colspan="3"></td>
+                    <td class="text-end">
+                        <button class="btn btn-sm btn-outline-danger border-0 p-0" onclick="deleteInvestment(${inv.id})">
+                            <i class="bi bi-x-circle"></i> Remove
+                        </button>
+                    </td>
+                </tr>
+             `;
         });
-    } catch (error) {
-        console.error("Advisor Error:", error);
+
+        const detailContainer = `
+            <tr id="${collapseId}" style="display:none;" class="bg-light">
+                <td colspan="7" class="p-0">
+                    <table class="table table-sm mb-0" style="background-color: transparent;">
+                       ${childRows}
+                    </table>
+                </td>
+            </tr>
+        `;
+        list.innerHTML += parentRow + detailContainer;
+    });
+}
+
+function toggleCollapse(id, rowElement) {
+    const el = document.getElementById(id);
+    const icon = rowElement.querySelector('.bi-chevron-down, .bi-chevron-up');
+    if (el.style.display === "none") {
+        el.style.display = "table-row";
+        rowElement.classList.add("expanded-row");
+        if(icon) { icon.classList.remove('bi-chevron-down'); icon.classList.add('bi-chevron-up'); }
+    } else {
+        el.style.display = "none";
+        rowElement.classList.remove("expanded-row");
+        if(icon) { icon.classList.remove('bi-chevron-up'); icon.classList.add('bi-chevron-down'); }
     }
 }
 
-// --- CRUD OPERATIONS ---
+async function fetchCharts() {
+    // 1. Determine Theme Colors
+    const isDark = document.body.classList.contains('dark-mode');
+    const textColor = isDark ? '#e0e0e0' : '#666';
+
+    // 2. FETCH DATA
+    const secRes = await fetch(`${API_URL}/sector-distrinbution`);
+    const secData = await secRes.json();
+
+    const histRes = await fetch(`${API_URL}/history/portfolio`);
+    const histData = await histRes.json();
+
+    // ----------------------------
+    // CHART 1: SECTOR (Pie Chart)
+    // ----------------------------
+    const ctx1 = document.getElementById('sectorChart').getContext('2d');
+    if (sectorChartInstance) sectorChartInstance.destroy();
+
+    sectorChartInstance = new Chart(ctx1, {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys(secData),
+            datasets: [{
+                data: Object.values(secData),
+                backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b'],
+                borderColor: isDark ? '#1e1e1e' : '#ffffff',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        color: textColor,
+                        usePointStyle: true,
+                        padding: 20,
+                        font: { size: 12 }
+                    }
+                }
+            },
+            cutout: '70%',
+        }
+    });
+
+    // ----------------------------
+    // CHART 2: HISTORY (Line Chart)
+    // ----------------------------
+    const ctx2 = document.getElementById('historyChart').getContext('2d');
+
+    // Gradient Fill
+    let gradient = ctx2.createLinearGradient(0, 0, 0, 400);
+    gradient.addColorStop(0, 'rgba(78, 115, 223, 0.5)');
+    gradient.addColorStop(1, 'rgba(78, 115, 223, 0.0)');
+
+    if (historyChartInstance) historyChartInstance.destroy();
+
+    historyChartInstance = new Chart(ctx2, {
+        type: 'line',
+        data: {
+            labels: Object.keys(histData),
+            datasets: [{
+                label: 'Portfolio Value',
+                data: Object.values(histData),
+                borderColor: '#4e73df',
+                borderWidth: 2,
+                backgroundColor: gradient,
+                tension: 0.3,
+                fill: true,
+                pointRadius: 0,
+                pointHoverRadius: 6,
+                pointBackgroundColor: '#4e73df'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                mode: 'index',
+                intersect: false,
+            },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: isDark ? '#333' : '#fff',
+                    titleColor: isDark ? '#fff' : '#333',
+                    bodyColor: isDark ? '#fff' : '#333',
+                    borderColor: '#ccc',
+                    borderWidth: 1,
+                    callbacks: {
+                        // <--- THIS FIXES THE DATE FORMAT --->
+                        title: function(tooltipItems) {
+                            const rawDate = tooltipItems[0].label;
+                            const d = new Date(rawDate);
+                            // Format: DD-MM-YYYY
+                            return `${("0" + d.getDate()).slice(-2)}-${("0" + (d.getMonth() + 1)).slice(-2)}-${d.getFullYear()}`;
+                        },
+                        // Optional: Format the value as Currency ($)
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            if (context.parsed.y !== null) {
+                                label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(context.parsed.y);
+                            }
+                            return label;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    display: true,
+                    grid: { display: false },
+                    ticks: {
+                        color: textColor,
+                        maxTicksLimit: 6,
+                        callback: function(val, index) {
+                            const label = this.getLabelForValue(val);
+                            const d = new Date(label);
+                            // Axis label format (e.g. Oct 25)
+                            return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                        }
+                    }
+                },
+                y: {
+                    display: true,
+                    grid: { display: false },
+                    ticks: { display: false }
+                }
+            }
+        }
+    });
+}
+
+async function fetchAdvisor() {
+    const res = await fetch(`${API_URL}/recommendations/portfolio`);
+    const suggestions = await res.json();
+    const list = document.getElementById('advisor-list');
+    list.innerHTML = "";
+
+    suggestions.forEach(s => {
+        let icon = 'bi-info-circle';
+        let colorClass = 'text-primary'; // Default Blue
+        let bgClass = 'list-group-item';
+
+        // 1. Analyze the text to determine sentiment
+        const text = s.toLowerCase();
+
+        if (text.includes("high")) {
+            // Negative / Warning
+            icon = 'bi-exclamation-triangle-fill';
+            colorClass = 'text-danger'; // Red
+        } else if (text.includes("low")) {
+            // Opportunity / Info
+            icon = 'bi-arrow-down-circle';
+            colorClass = 'text-info'; // Cyan/Blue
+        } else if (text.includes("balanced") || text.includes("good work")) {
+            // Positive
+            icon = 'bi-check-circle-fill';
+            colorClass = 'text-success'; // Green
+        }
+
+        // 2. Render the item with the chosen style
+        list.innerHTML += `
+            <li class="list-group-item d-flex align-items-start">
+                <i class="bi ${icon} ${colorClass} me-3 mt-1 fs-5"></i>
+                <span class="${colorClass === 'text-danger' ? 'text-danger' : ''}">${s}</span>
+            </li>
+        `;
+    });
+}
+
 async function addInvestment(e) {
     e.preventDefault();
-    const inv = {
+    const payload = {
         ticker: document.getElementById('ticker').value.toUpperCase(),
         buyPrice: parseFloat(document.getElementById('buyPrice').value),
         quantity: parseInt(document.getElementById('quantity').value),
-        sector: document.getElementById('sector').value
+        sector: document.getElementById('sector').value,
+        purchaseDate: document.getElementById('purchaseDate').value + "T00:00:00"
     };
-
-    try {
-        const res = await fetch(`${BASE_URL}/`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(inv)
-        });
-        if (res.ok) {
-            document.getElementById('add-form').reset();
-            fetchPortfolio();
-        }
-    } catch (err) {
-        console.error("Add failed:", err);
-    }
+    await fetch(API_URL + "/", {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    });
+    alert("Asset Added!");
+    document.getElementById('add-form').reset();
+    document.getElementById('purchaseDate').value = new Date().toISOString().split('T')[0];
+    fetchDashboardData();
+    fetchCharts();
 }
 
 async function deleteInvestment(id) {
-    if (confirm("Delete this asset?")) {
-        try {
-            await fetch(`${BASE_URL}/${id}`, { method: 'DELETE' });
-            fetchPortfolio();
-        } catch (err) {
-            console.error("Delete failed:", err);
-        }
-    }
+    if (!confirm("Remove this entry?")) return;
+    await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+    fetchDashboardData();
+    fetchCharts();
 }
 
-// --- SIMULATOR ---
+async function uploadCsv() {
+    const fileInput = document.getElementById('csv-file-input');
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await fetch(`${API_URL}/preview-csv`, { method: 'POST', body: formData });
+    const rawList = await res.json();
+    const tbody = document.getElementById('csv-preview-body');
+    tbody.innerHTML = "";
+    rawList.forEach((inv, index) => {
+        tbody.innerHTML += `
+            <tr data-index="${index}">
+                <td><input type="text" class="form-control form-control-sm csv-ticker" value="${inv.ticker}"></td>
+                <td><input type="number" class="form-control form-control-sm csv-price" value="${inv.buyPrice}"></td>
+                <td><input type="number" class="form-control form-control-sm csv-qty" value="${inv.quantity}"></td>
+                <td><input type="text" class="form-control form-control-sm csv-sector" value="${inv.sector}"></td>
+            </tr>`;
+    });
+    const modal = new bootstrap.Modal(document.getElementById('csvPreviewModal'));
+    modal.show();
+}
+
+async function confirmCsvUpload() {
+    const rows = document.querySelectorAll('#csv-preview-body tr');
+    const finalData = Array.from(rows).map(row => {
+        return {
+            ticker: row.querySelector('.csv-ticker').value.toUpperCase(),
+            buyPrice: parseFloat(row.querySelector('.csv-price').value),
+            quantity: parseInt(row.querySelector('.csv-qty').value),
+            sector: row.querySelector('.csv-sector').value
+        };
+    });
+    await fetch(`${API_URL}/batch`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(finalData)
+    });
+    alert("Batch Upload Successful!");
+    location.reload();
+}
+
 async function runSimulation() {
     const trade = {
         ticker: document.getElementById('sim-ticker').value.toUpperCase(),
@@ -1289,35 +863,47 @@ async function runSimulation() {
         quantity: parseInt(document.getElementById('sim-qty').value),
         sector: document.getElementById('sim-sector').value
     };
+    const res = await fetch(`${API_URL}/simulate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(trade)
+    });
+    const data = await res.json();
 
-    try {
-        const response = await fetch(`${BASE_URL}/simulate`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(trade)
-        });
-        const data = await response.json();
+    document.getElementById('sim-results').style.display = 'block';
 
-        // Update UI logic for Risk Level
-        document.getElementById('sim-empty-state').style.display = 'none';
-        document.getElementById('sim-results').style.display = 'block';
-
-        const riskLevelEl = document.getElementById('sim-risk-level');
-        riskLevelEl.innerText = data.riskLevel;
-        document.getElementById('sim-risk-msg').innerText = data.riskMessage;
-
-        // Visual bar for concentration
-        const bar = document.getElementById('sim-conc-bar');
-        bar.style.width = data.highestStockPct + "%";
-        document.getElementById('sim-conc-val').innerText = data.highestStockPct.toFixed(1) + "%";
-        document.getElementById('sim-conc-name').innerText = data.highestStockTicker;
-
-    } catch (err) {
-        console.error("Simulation failed:", err);
+    const riskBadge = document.getElementById('sim-risk-icon-box');
+    const riskTitle = document.getElementById('sim-risk-level');
+    if (data.riskLevel === 'HIGH') {
+        riskBadge.className = "rounded-circle p-3 me-3 text-white bg-danger";
+        riskTitle.innerText = "HIGH RISK";
+    } else if (data.riskLevel === 'MEDIUM') {
+        riskBadge.className = "rounded-circle p-3 me-3 text-dark bg-warning";
+        riskTitle.innerText = "MEDIUM RISK";
+    } else {
+        riskBadge.className = "rounded-circle p-3 me-3 text-white bg-success";
+        riskTitle.innerText = "HEALTHY";
     }
+    document.getElementById('sim-risk-msg').innerText = data.riskMessage;
+
+    const conc = data.highestStockPct;
+    document.getElementById('sim-conc-name').innerText = data.highestStockTicker;
+    document.getElementById('sim-conc-val').innerText = conc.toFixed(1) + "%";
+    document.getElementById('sim-conc-bar').style.width = conc + "%";
+    document.getElementById('sim-conc-bar').className = conc > 30 ? "progress-bar bg-danger" : "progress-bar bg-info";
+
+    const list = document.getElementById('sector-impact-list');
+    list.innerHTML = "";
+    const allSec = new Set([...Object.keys(data.oldSectorAllocation), ...Object.keys(data.newSectorAllocation)]);
+    allSec.forEach(sec => {
+        const oldP = data.oldSectorAllocation[sec] || 0;
+        const newP = data.newSectorAllocation[sec] || 0;
+        if(Math.abs(newP - oldP) > 0.1) {
+             list.innerHTML += `<div class="list-group-item d-flex justify-content-between"><span class="small">${sec}</span><span class="small fw-bold">${oldP.toFixed(1)}% <i class="bi bi-arrow-right"></i> ${newP.toFixed(1)}%</span></div>`;
+        }
+    });
 }
 
-// --- UTILITIES ---
-function formatMoney(num) {
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(num);
+function formatMoney(amount) {
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
 }
