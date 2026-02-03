@@ -26,55 +26,114 @@ public class BotService {
     //Processes user query and returns portfolio service
     public BotResponse processQuery(String query) {
 
-        PortfolioSummary summary = investmentService.getPortfolioSummary();
         String normalized = query.toLowerCase();
+        BotIntent intent = detectIntent(normalized);
 
-        String responseText;
+        switch (intent) {
 
-        // Intent: portfolio summary
-        if (normalized.contains("summary")
-                || normalized.contains("summarize")
-                || normalized.contains("overview")) {
-            return new BotResponse(buildSummaryResponse(summary));
-        }
+            case SUMMARY:
+                return new BotResponse(buildSummaryResponse());
 
-        // Intent: risk / diversification
-        else if (normalized.contains("risk")
-                || normalized.contains("risky")
-                || normalized.contains("safe")) {
-            return new BotResponse(buildRiskResponse());
-        }
+            case VALUE:
+                return new BotResponse(buildTotalValueResponse());
 
-        // Default fallback
-        else {
-            responseText =
-                    "I can help summarize your portfolio, assess risk, or give insights. Try asking: 'Summarize my portfolio'.";
-        }
+            case RISK:
+                return new BotResponse(buildRiskResponse());
 
-        // AI explanation layer (safe fallback)
-        try {
-            return new BotResponse(aiExplanationService.explain(responseText));
-        } catch (Exception e) {
-            // If AI fails, return deterministic response
-            return new BotResponse(responseText);
+            case SECTOR:
+                return new BotResponse(buildSectorResponse());
+
+            case BEST_WORST:
+                return new BotResponse(buildBestWorstResponse());
+
+            case ADVICE:
+                return new BotResponse(buildAdviceResponse());
+
+            case HELP:
+                return new BotResponse(buildHelpResponse());
+
+            default:
+                return new BotResponse(
+                        "I didn’t understand that. Type 'help' to see what I can do."
+                );
         }
     }
 
-    private String buildSummaryResponse(PortfolioSummary summary) {
+    private BotIntent detectIntent(String q) {
+
+        if (q.contains("summary") || q.contains("summarize") || q.contains("overview")) {
+            return BotIntent.SUMMARY;
+        }
+        if (q.contains("value") || q.contains("worth")) {
+            return BotIntent.VALUE;
+        }
+        if (q.contains("risk") || q.contains("risky")) {
+            return BotIntent.RISK;
+        }
+        if (q.contains("sector")) {
+            return BotIntent.SECTOR;
+        }
+        if (q.contains("best") || q.contains("worst") || q.contains("top")) {
+            return BotIntent.BEST_WORST;
+        }
+        if (q.contains("advice") || q.contains("suggest")) {
+            return BotIntent.ADVICE;
+        }
+        if (q.contains("help") || q.contains("can you do")) {
+            return BotIntent.HELP;
+        }
+
+        return BotIntent.UNKNOWN;
+    }
+
+
+
+    private String buildSummaryResponse() {
+        PortfolioSummary s = investmentService.getPortfolioSummary();
         return String.format(
                 "Your portfolio contains %d assets worth %.2f in total. " +
                         "Top holding: %s. Weakest holding: %s.",
-                summary.getTotalAssets(),
-                summary.getTotalValue(),
-                summary.getTopHolding(),
-                summary.getWorstHolding()
+                s.getTotalAssets(),
+                s.getTotalValue(),
+                s.getTopHolding(),
+                s.getWorstHolding()
         );
     }
 
-    private String buildRiskResponse() {
-        return "Risk analysis is based on diversification and sector exposure. " +
-                "You may consider reducing overexposure to a single asset or sector.";
+    private String buildTotalValueResponse() {
+        double value = investmentService.getTotalPortfolioValue();
+        return "Your total portfolio value is " + String.format("%.2f", value) + ".";
     }
+
+    private String buildRiskResponse() {
+        return "Your portfolio risk depends on diversification and sector concentration.";
+    }
+
+    private String buildSectorResponse() {
+        return "You can view sector-wise allocation to understand diversification.";
+    }
+
+    private String buildBestWorstResponse() {
+        PortfolioSummary s = investmentService.getPortfolioSummary();
+        return "Best holding: " + s.getTopHolding() +
+                ". Weakest holding: " + s.getWorstHolding() + ".";
+    }
+
+    private String buildAdviceResponse() {
+        return String.join(" ", investmentService.getAdvisorSUggestions());
+    }
+
+    private String buildHelpResponse() {
+        return """
+    I can help you with:
+    - Portfolio summary
+    - Total value
+    - Risk analysis
+    - Sector allocation
+    - Investment suggestions
+    """;
+    }
+
 
 }
 
