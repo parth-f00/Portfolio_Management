@@ -22,44 +22,50 @@ public class AIExplanationService {
     public String explain(String text) {
 
         if (apiKey == null || apiKey.isBlank()) {
-            throw new IllegalStateException("OpenAI API key not configured");
+            // AI disabled → return original text
+            return text;
         }
 
+        try {
+            String url = "https://api.openai.com/v1/chat/completions";
 
-        log.info("Calling OpenAI API");
+            Map<String, Object> body = new HashMap<>();
+            body.put("model", "gpt-3.5-turbo");
+            body.put("temperature", 0.4);
 
+            List<Map<String, String>> messages = new ArrayList<>();
+            messages.add(Map.of(
+                    "role", "system",
+                    "content",
+                    "You are a financial assistant. " +
+                            "Rewrite the response in a friendly, clear way. " +
+                            "Do NOT change numbers. Add a short disclaimer."
+            ));
+            messages.add(Map.of(
+                    "role", "user",
+                    "content", text
+            ));
 
-        String url = "https://api.openai.com/v1/chat/completions";
+            body.put("messages", messages);
 
-        Map<String, Object> body = new HashMap<>();
-        body.put("model", "gpt-3.5-turbo");
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBearerAuth(apiKey);
 
-        List<Map<String, String>> messages = new ArrayList<>();
-        messages.add(Map.of(
-                "role", "system",
-                "content", "You are a financial assistant. Explain clearly and add a short disclaimer."
-        ));
-        messages.add(Map.of(
-                "role", "user",
-                "content", text
-        ));
+            HttpEntity<Map<String, Object>> request =
+                    new HttpEntity<>(body, headers);
 
-        body.put("messages", messages);
-        body.put("temperature", 0.4);
+            ResponseEntity<Map> response =
+                    restTemplate.postForEntity(url, request, Map.class);
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(apiKey);
+            Map choice = (Map) ((List) response.getBody().get("choices")).get(0);
+            Map message = (Map) choice.get("message");
 
-        HttpEntity<Map<String, Object>> request =
-                new HttpEntity<>(body, headers);
+            return (String) message.get("content");
 
-        ResponseEntity<Map> response =
-                restTemplate.postForEntity(url, request, Map.class);
-
-        Map choice = (Map) ((List) response.getBody().get("choices")).get(0);
-        Map message = (Map) choice.get("message");
-
-        return (String) message.get("content");
+        } catch (Exception e) {
+            // AI failed → return original response
+            return text;
+        }
     }
 }

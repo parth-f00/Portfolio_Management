@@ -3,10 +3,12 @@ package org.neueda.rest.project.bot;
 public enum BotIntent {
     SUMMARY,
     VALUE,
-    RISK,
     SECTOR,
-    BEST_WORST,
-    ADVICE,
+    BEST_WORST_PERFORMER,
+    ADVISOR_INSIGHT,
     HELP,
+    PROFIT_LOSS,
+    RISK_LEVEL,
+    MOST_INVESTED_SECTOR,
     UNKNOWN
 }
