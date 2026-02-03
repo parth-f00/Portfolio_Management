@@ -6,6 +6,8 @@ import org.neueda.rest.project.dto.PortfolioSummary;
 import org.springframework.stereotype.Service;
 import org.neueda.rest.project.service.InvestmentService;
 
+import java.util.List;
+
 
 @Service
 public class BotService {
@@ -39,35 +41,71 @@ public class BotService {
 
             case SUMMARY:
                 lastIntent = BotIntent.SUMMARY;
-                return new BotResponse(buildSummaryResponse());
+                return new BotResponse(
+                        buildSummaryResponse(),
+                        "SUMMARY",
+                        List.of("Check risk", "View sector allocation", "Get advice")
+                );
 
             case VALUE:
                 lastIntent = BotIntent.VALUE;
-                return new BotResponse(buildTotalValueResponse());
+                return new BotResponse(
+                        buildTotalValueResponse(),
+                        "VALUE",
+                        List.of("Summarize portfolio", "Check risk")
+                );
 
             case RISK:
                 lastIntent = BotIntent.RISK;
-                return new BotResponse(buildRiskResponse());
+                return new BotResponse(
+                        buildRiskResponse(),
+                        "RISK",
+                        List.of("Get advice", "View sectors")
+                );
 
             case SECTOR:
                 lastIntent = BotIntent.SECTOR;
-                return new BotResponse(buildSectorResponse());
+                return new BotResponse(
+                        buildSectorResponse(),
+                        "SECTOR",
+                        List.of("Check risk", "Get advice")
+                );
 
             case BEST_WORST:
                 lastIntent = BotIntent.BEST_WORST;
-                return new BotResponse(buildBestWorstResponse());
+                return new BotResponse(
+                        buildBestWorstResponse(),
+                        "BEST_WORST",
+                        List.of("Summarize portfolio", "Check risk")
+                );
 
             case ADVICE:
                 lastIntent = BotIntent.ADVICE;
-                return new BotResponse(buildAdviceResponse());
+                return new BotResponse(
+                        buildAdviceResponse(),
+                        "ADVICE",
+                        List.of("Summarize portfolio", "Check risk")
+                );
 
             case HELP:
-                return new BotResponse(buildHelpResponse());
+                return new BotResponse(
+                        buildHelpResponse(),
+                        "HELP",
+                        List.of(
+                                "Summarize my portfolio",
+                                "What is my portfolio value?",
+                                "Is my portfolio risky?",
+                                "Any advice?"
+                        )
+                );
 
             default:
                 return new BotResponse(
-                        "I didn’t understand that. Type 'help' to see what I can do."
+                        "I didn’t understand that. Type 'help' to see what I can do.",
+                        "UNKNOWN",
+                        List.of("Help", "Summarize my portfolio")
                 );
+
         }
     }
 
