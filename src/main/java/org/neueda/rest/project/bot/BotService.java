@@ -13,6 +13,7 @@ public class BotService {
     //Core portfolio service used to fetch and compute portfolio data
     private final InvestmentService investmentService;
     private final AIExplanationService aiExplanationService;
+    private BotIntent lastIntent = null;
 
 
     //Injecting portfolio business logic into the bot layer
@@ -29,24 +30,35 @@ public class BotService {
         String normalized = query.toLowerCase();
         BotIntent intent = detectIntent(normalized);
 
+        if (intent == BotIntent.UNKNOWN && lastIntent != null) {
+            intent = resolveFollowUp(normalized, lastIntent);
+        }
+
+
         switch (intent) {
 
             case SUMMARY:
+                lastIntent = BotIntent.SUMMARY;
                 return new BotResponse(buildSummaryResponse());
 
             case VALUE:
+                lastIntent = BotIntent.VALUE;
                 return new BotResponse(buildTotalValueResponse());
 
             case RISK:
+                lastIntent = BotIntent.RISK;
                 return new BotResponse(buildRiskResponse());
 
             case SECTOR:
+                lastIntent = BotIntent.SECTOR;
                 return new BotResponse(buildSectorResponse());
 
             case BEST_WORST:
+                lastIntent = BotIntent.BEST_WORST;
                 return new BotResponse(buildBestWorstResponse());
 
             case ADVICE:
+                lastIntent = BotIntent.ADVICE;
                 return new BotResponse(buildAdviceResponse());
 
             case HELP:
@@ -86,6 +98,26 @@ public class BotService {
         return BotIntent.UNKNOWN;
     }
 
+    private BotIntent resolveFollowUp(String q, BotIntent previous) {
+
+        if (q.contains("risk")) {
+            return BotIntent.RISK;
+        }
+        if (q.contains("advice") || q.contains("suggest")) {
+            return BotIntent.ADVICE;
+        }
+        if (q.contains("sector")) {
+            return BotIntent.SECTOR;
+        }
+        if (q.contains("value") || q.contains("worth")) {
+            return BotIntent.VALUE;
+        }
+        if (q.contains("what about") || q.contains("and")) {
+            return previous;
+        }
+
+        return BotIntent.UNKNOWN;
+    }
 
 
     private String buildSummaryResponse() {
