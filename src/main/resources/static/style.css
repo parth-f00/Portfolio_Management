@@ -213,7 +213,7 @@ body.dark-mode .text-info {
 #advisor-list .list-group-item {
     border: 1px solid var(--border-color);
     border-radius: 6px !important;
-    font-size: 1.01rem;
+    font-size: 1 rem;
     padding: 15px;
     background-color: var(--card-bg);
     color: var(--text-main);
