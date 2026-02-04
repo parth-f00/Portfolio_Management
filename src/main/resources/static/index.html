@@ -421,6 +421,7 @@
 </div>
 
 <script>
+    let welcomed = false;
     const toggleBtn = document.getElementById("chat-toggle");
     const chatbox = document.getElementById("chatbox");
     const closeBtn = document.getElementById("chat-close");
@@ -429,7 +430,15 @@
     const messages = document.getElementById("chatbox-messages");
 
     /* Open / Close */
-    toggleBtn.onclick = () => chatbox.style.display = "flex";
+    toggleBtn.onclick = () => {
+    chatbox.style.display = "flex";
+
+    if (!welcomed) {
+        addMessage("👋 Hi Kishor! I’m your Portfolio Assistant. Ask me about risk, profit/loss, sectors, or insights.", "chat-bot");
+        welcomed = true;
+    }
+};
+
     closeBtn.onclick = () => chatbox.style.display = "none";
 
     /* Add message */
