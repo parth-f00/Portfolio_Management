@@ -473,12 +473,38 @@ async function addInvestment(e) {
     fetchCharts();
 }
 
-async function deleteInvestment(id) {
-    if (!confirm("Remove this entry?")) return;
-    await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
-    fetchDashboardData();
-    fetchCharts();
+let idToDelete=null;
+function deleteInvestment(id){
+    idToDelete=id;
+    const modal= new bootstrap.Modal(document.getElementById('deleteModal'));
+    modal.show();
 }
+
+async function confirmDelete(){
+    if(!idToDelete) return;
+    try{
+        const modalEl=document.getElementById('deleteModal');
+        const modal=bootstrap.Modal.getInstance(modalEl);
+        modal.hide();
+
+        await fetch(`${API_URL}/${idToDelete}`,{method:'DELETE'})
+
+        showToast("Asset removed successfully");
+        fetchDashboardData();
+        fetchChart();
+    }
+    catch(error){
+    console.error(error);
+    }finally{
+    idToDelete=null;
+    }
+}
+//async function deleteInvestment(id) {
+//    if (!confirm("Remove this entry?")) return;
+//    await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+//    fetchDashboardData();
+//    fetchCharts();
+//}
 
 async function uploadCsv() {
     const fileInput = document.getElementById('csv-file-input');
