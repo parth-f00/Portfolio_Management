@@ -471,6 +471,7 @@ async function addInvestment(e) {
     document.getElementById('purchaseDate').value = new Date().toISOString().split('T')[0];
     fetchDashboardData();
     fetchCharts();
+    fetchAdvisor();
 }
 
 let idToDelete=null;

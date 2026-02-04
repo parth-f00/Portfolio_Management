@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+
+
 @Service
 public class FinnhubService {
 
@@ -25,6 +27,9 @@ public class FinnhubService {
 
     @Value("${finnhub.api.key}")
     private String apiKey;
+
+//    @Value("${tiingo.api.key}")
+//    private String tiingoKey;
 
 //    public Map<String,Object> getHistory(String ticker){
 //        try {
@@ -82,7 +87,8 @@ public class FinnhubService {
         }
         System.out.println("Cache miss for history: "+Ticker);
 
-        String tiingoKey="ed6323f960843c766b96a3ffe4ed866599aa1fa9";
+
+        String tiingoKey = "I_AM_A_BAD_KEY";
         String startDate= LocalDate.now().minusDays(30).toString();
 //        String startDate="2023-01-01";
         String url="https://api.tiingo.com/tiingo/daily/"+Ticker+"/prices?startDate="+startDate+"&token="+tiingoKey;
@@ -91,7 +97,9 @@ public class FinnhubService {
             RestTemplate restTemplate= new RestTemplate();
             List<Map<String,Object>> response= restTemplate.getForObject(url, List.class);
             if(response==null || response.isEmpty()){
-                return Map.of("s", "no_data","error","Empty response from tiingo");
+                System.out.println("API RETURNED EMPTY, SWITCHING TO DUMMY DATA");
+//                return Map.of("s", "no_data","error","Empty response from tiingo");
+                return getMockHistory(Ticker);
             }
 
             List<Double> closes=new ArrayList<>();
@@ -131,10 +139,50 @@ public class FinnhubService {
             return finalResult;
         } catch (Exception e) {
             System.out.println("Error fetching company history: "+Ticker + e.getMessage());
-            return Map.of("s", "no_data","error","Failed to fetch company history");
+//            return Map.of("s", "no_data","error","Failed to fetch company history");
+            return getMockHistory(Ticker);
         }
     }
 
+     private Map<String,Object> getMockHistory(String ticker){
+
+        List<Double> closes=new ArrayList<>();
+        List<Long> timestamps=new ArrayList<>();
+
+        List<Map<String, Object>> priceList=new ArrayList<>();
+
+        double currentPrice=240+(Math.random()*100);
+        long now= LocalDate.now().atStartOfDay(java.time.ZoneOffset.UTC).toEpochSecond();;
+
+        for(int i=30;i>0;i--) {
+            double change = (Math.random() - 0.5) * 5;
+            currentPrice += change;
+
+            double price = Math.round(currentPrice * 100.0) / 100.0;
+            long timeStamp= now-(i*86400L);
+            String dateStr= Instant.ofEpochSecond(timeStamp).toString();
+            closes.add(price);
+            timestamps.add(timeStamp);
+
+            Map<String, Object>dayEntry= new HashMap<>();
+            dayEntry.put("date", dateStr);
+            dayEntry.put("close", price);
+            priceList.add(dayEntry);
+        }
+            double sum=0;
+            for(Double p:closes){
+                sum+=p;
+            }
+            double sma=sum/closes.size();
+            Map<String, Object> mock=new HashMap<>();
+            mock.put("c", closes);
+            mock.put("t",timestamps);
+            mock.put("sma",sma);
+            mock.put("s", "ok");
+            mock.put("prices",priceList);
+            historyCache.put(ticker,new CachedItem<>(mock));
+            return mock;
+        }
 
 
     public BigDecimal getStockPrice(String ticker){
