@@ -1,6 +1,9 @@
 
-package org.neueda.rest.project.bot;
+package org.neueda.rest.project.controller;
 
+import org.neueda.rest.project.bot.BotRequest;
+import org.neueda.rest.project.bot.BotResponse;
+import org.neueda.rest.project.service.BotService;
 import org.springframework.web.bind.annotation.*;
 
 @RestController

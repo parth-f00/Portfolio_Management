@@ -1,4 +1,4 @@
-package org.neueda.rest.project.ai;
+package org.neueda.rest.project.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,14 +10,14 @@ import org.springframework.web.client.RestTemplate;
 import java.util.*;
 
 @Service
-public class AIExplanationService {
+public class AIService {
 
     @Value("${openai.api.key:}")
     private String apiKey;
 
     private final RestTemplate restTemplate = new RestTemplate();
     private static final Logger log =
-            LoggerFactory.getLogger(AIExplanationService.class);
+            LoggerFactory.getLogger(AIService.class);
 
     public String explain(String text) {
 

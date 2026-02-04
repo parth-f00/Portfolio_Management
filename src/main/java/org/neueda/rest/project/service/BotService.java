@@ -1,11 +1,11 @@
 
-package org.neueda.rest.project.bot;
+package org.neueda.rest.project.service;
 
-import org.neueda.rest.project.ai.AIExplanationService;
+import org.neueda.rest.project.bot.BotIntent;
+import org.neueda.rest.project.bot.BotResponse;
 import org.neueda.rest.project.dto.DashboardDTO;
 import org.neueda.rest.project.dto.PortfolioSummary;
 import org.springframework.stereotype.Service;
-import org.neueda.rest.project.service.InvestmentService;
 
 import java.util.List;
 import java.util.Map;
@@ -16,7 +16,7 @@ public class BotService {
 
     //Core portfolio service used to fetch and compute portfolio data
     private final InvestmentService investmentService;
-    private final AIExplanationService aiExplanationService;
+    private final AIService aiExplanationService;
     private BotIntent lastIntent = null;
     private BotIntent lastResolvedIntent = null;
 
@@ -24,7 +24,7 @@ public class BotService {
 
     //Injecting portfolio business logic into the bot layer
     public BotService(InvestmentService investmentService,
-                      AIExplanationService aiExplanationService) {
+                      AIService aiExplanationService) {
         this.investmentService = investmentService;
         this.aiExplanationService = aiExplanationService;
     }
