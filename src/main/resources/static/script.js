@@ -1,13 +1,13 @@
-// ✅ UPDATED: Define both endpoints
+
 const API_URL = "http://localhost:8082/api/portfolio";
-const PREDICT_URL = "http://localhost:8082/api/prediction"; // Port 8082 to match your app
+const PREDICT_URL = "http://localhost:8082/api/prediction";
 
 let sectorChartInstance = null;
 let historyChartInstance = null;
 
-// --- INIT ---
+
 document.addEventListener("DOMContentLoaded", () => {
-    // 1. Dark Mode Init
+
     if(localStorage.getItem('theme') === 'dark') {
         document.body.classList.add('dark-mode');
         document.getElementById('theme-btn').innerHTML = '<i class="bi bi-sun-fill"></i>';
@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
     initScrollSpy();
 });
 
-// --- SCROLL SPY LOGIC ---
+// SCROLL SPY LOGIC
 function initScrollSpy() {
     const sections = document.querySelectorAll('div[id^="section-"]');
     const navLinks = document.querySelectorAll('.list-group-item');
@@ -74,7 +74,7 @@ function initScrollSpy() {
     sections.forEach(section => observer.observe(section));
 }
 
-// --- NAVIGATION ---
+//  NAVIGATION
 function scrollToSection(id) {
     const el = document.getElementById(id);
     if(el) {
@@ -82,7 +82,7 @@ function scrollToSection(id) {
     }
 }
 
-// --- THEME TOGGLE ---
+//  THEME TOGGLE
 function toggleTheme() {
     document.body.classList.toggle('dark-mode');
     const isDark = document.body.classList.contains('dark-mode');
@@ -91,7 +91,7 @@ function toggleTheme() {
     fetchCharts();
 }
 
-// --- DATA FETCHING ---
+//  DATA FETCHING
 async function fetchDashboardData() {
     try {
         const valRes = await fetch(`${API_URL}/total-value`);
@@ -100,6 +100,10 @@ async function fetchDashboardData() {
 
         const res = await fetch(`${API_URL}/`);
         const data = await res.json();
+
+        data.sort((a,b)=>{
+         new Date(b.purchaseDate)-new Date(a.purchaseDate);
+        })
 
         document.getElementById('total-holdings').innerText = data.length;
         renderGroupedTable(data);
@@ -154,7 +158,7 @@ function renderGroupedTable(investments) {
         const trendIcon = group.trend === 'UP' ? '<i class="bi bi-arrow-up-circle-fill text-success"></i>' : (group.trend === 'DOWN' ? '<i class="bi bi-arrow-down-circle-fill text-danger"></i>' : '<i class="bi bi-dash-circle text-muted"></i>');
         const collapseId = `collapse-${group.ticker}`;
 
-        // ✅ NEW: Added the Predict Button Column
+//         Added the Predict Button Column
         const parentRow = `
             <tr class="clickable-row fw-bold" onclick="toggleCollapse('${collapseId}', this)">
                 <td>${group.ticker} <span class="badge bg-light text-dark border ms-1">${group.sector}</span></td>
@@ -431,6 +435,21 @@ async function fetchAdvisor() {
     });
 }
 
+// ✅ NEW: Helper for Toast Notifications
+function showToast(message) {
+    const toastEl = document.getElementById('liveToast');
+    const msgEl = document.getElementById('toast-msg');
+
+    // Set message
+    msgEl.innerText = message;
+
+    // Show using Bootstrap API
+    const toast = new bootstrap.Toast(toastEl);
+    toast.show();
+}
+
+
+
 async function addInvestment(e) {
     e.preventDefault();
     const payload = {
@@ -445,7 +464,9 @@ async function addInvestment(e) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
     });
-    alert("Asset Added!");
+//    alert("Asset Added!");  alert accha nhi hai
+
+    showToast("Asset added successfully")
     document.getElementById('add-form').reset();
     document.getElementById('purchaseDate').value = new Date().toISOString().split('T')[0];
     fetchDashboardData();

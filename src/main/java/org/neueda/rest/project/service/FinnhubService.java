@@ -119,7 +119,7 @@ public class FinnhubService {
             for(Double p: trendPrices){
                 sum+=p;
             }
-            double sma=sum/closes.size();
+            double sma=sum/trendPrices.size();
 
             Map<String, Object> finalResult= new HashMap<>();
             finalResult.put("c", closes);
@@ -168,7 +168,7 @@ public class FinnhubService {
     static class FinnhubResponse{
          @JsonProperty("c")
         private Double currentPrice;
-    }
 
+    }
 
 }

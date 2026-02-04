@@ -17,7 +17,7 @@ html {
     --list-item-text: #212529;
 }
 
-/* DARK MODE VARIABLES */
+/* DARK MODE ke VARIABLES */
 body.dark-mode {
     --bg-body: #121212;
     --bg-sidebar: #000000;
@@ -39,7 +39,7 @@ body {
     transition: background-color 0.3s, color 0.3s;
 }
 
-/* LAYOUT */
+/*sara LAYOUT */
 #wrapper { overflow-x: hidden; }
 #sidebar-wrapper {
     min-height: 100vh;
@@ -71,7 +71,7 @@ h3, h5, h6, p, span, div {
     color: var(--text-secondary) !important;
 }
 
-/* LIST GROUPS (Insights & Sector Impact) */
+/*  Insights & Sector Impact */
 .list-group-item {
     background-color: var(--list-item-bg);
     color: var(--list-item-text);
@@ -81,7 +81,7 @@ h3, h5, h6, p, span, div {
 /* TABLES (Crucial for Dark Mode) */
 .table {
     color: var(--text-main) !important;
-    --bs-table-bg: transparent; /* Remove bootstrap default */
+    --bs-table-bg: transparent;
 }
 .table thead th {
     color: var(--text-main);
@@ -119,50 +119,48 @@ h3, h5, h6, p, span, div {
     #sidebar-wrapper { margin-left: -260px; }
     #page-content-wrapper { margin-left: 0; }
 }
-/* FIX: Force Table Headers to be Dark in Dark Mode */
+
 body.dark-mode .table thead th {
     background-color: #2c2c2c !important; /* Dark Grey Background */
     color: #ffffff !important;            /* Pure White Text */
     border-color: #444;
 }
 
-/* FIX: Table Rows Hover Effect */
+
 body.dark-mode .table-hover tbody tr:hover {
     color: #ffffff;
     background-color: rgba(255, 255, 255, 0.1) !important;
 }
 
-/* FIX: Force Table Headers to be Dark in Dark Mode */
+
 body.dark-mode .table thead th {
     background-color: #2c2c2c !important; /* Dark Grey Background */
     color: #ffffff !important;            /* Pure White Text */
     border-color: #444;
 }
 
-/* FIX: Table Rows Hover Effect */
+/* Table Rows Hover Effect */
 body.dark-mode .table-hover tbody tr:hover {
     color: #ffffff;
     background-color: rgba(255, 255, 255, 0.1) !important;
 }
 
-/* =========================================
-   FINAL FIX: EXPANDED ROW VISIBILITY
-   ========================================= */
 
-/* 1. Force the inner details table to use high-contrast text */
+
+
 #investment-list tr.bg-light td table td {
     color: var(--text-main) !important;
     opacity: 1 !important;
 }
 
-/* 2. Override "text-muted" inside the expanded details
+/*
    This ensures Buy Price, Qty, and Date are always visible */
 #investment-list tr.bg-light td table td.text-muted {
     color: var(--text-secondary) !important;
-    font-weight: 500; /* Make it slightly bolder to read */
+    font-weight: 500;
 }
 
-/* 3. Dark Mode Specific Overrides for the Inner Table */
+
 body.dark-mode #investment-list tr.bg-light {
     background-color: #2b2b2b !important; /* Distinct dark grey background */
 }
@@ -176,12 +174,9 @@ body:not(.dark-mode) #investment-list tr.bg-light td table td.text-muted {
     color: #495057 !important; /* Darker Grey for Light Mode */
 }
 
-/* =========================================
-   FIX: SUMMARY CARD TEXT COLORS
-   ========================================= */
 
-/* In Dark Mode, use lighter/brighter versions of the colors
-   so they are readable against the dark card background */
+
+
 body.dark-mode .text-primary {
     color: #6ea8fe !important; /* Lighter Blue */
 }
@@ -200,12 +195,10 @@ body.dark-mode .text-info {
     border: 1px solid var(--border-color); /* Keep a subtle border */
 }
 
-/* =========================================
-   FINAL ADVISOR CARDS (Flat & Clean)
-   ========================================= */
+
 
 #advisor-list {
-    gap: 8px; /* Slight spacing between items */
+    gap: 8px;
     display: flex;
     flex-direction: column;
 }
@@ -218,41 +211,40 @@ body.dark-mode .text-info {
     background-color: var(--card-bg);
     color: var(--text-main);
 
-    /* Smooth Color Transition only */
+
     transition: background-color 0.2s, border-left-width 0.1s;
     position: relative;
-    border-left: 4px solid transparent; /* Invisible border ready to appear */
+    border-left: 4px solid transparent;
 }
 
-/* --- LIGHT MODE HOVER --- */
+
 #advisor-list .list-group-item:hover {
-    background-color: #f8f9fa; /* Very subtle grey tint */
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05); /* Tiny shadow for depth, no lift */
+    background-color: #f8f9fa;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
-/* --- DARK MODE HOVER --- */
+
 body.dark-mode #advisor-list .list-group-item:hover {
     background-color: #252525; /* Lighter dark grey */
     box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 
-/* --- SMART COLOR BORDERS ON HOVER --- */
-/* These reveal the color code only when you mouse over */
+
 
 /* Warning (Red) */
 #advisor-list .list-group-item:has(.text-danger):hover {
     border-left-color: #dc3545;
-    background-color: rgba(220, 53, 69, 0.05) !important; /* Faint Red Tint */
+    background-color: rgba(220, 53, 69, 0.05) !important;
 }
 
 /* Success (Green) */
 #advisor-list .list-group-item:has(.text-success):hover {
     border-left-color: #198754;
-    background-color: rgba(25, 135, 84, 0.05) !important; /* Faint Green Tint */
+    background-color: rgba(25, 135, 84, 0.05) !important;
 }
 
 /* Info (Blue) */
 #advisor-list .list-group-item:has(.text-info):hover {
     border-left-color: #0dcaf0;
-    background-color: rgba(13, 202, 240, 0.05) !important; /* Faint Blue Tint */
+    background-color: rgba(13, 202, 240, 0.05) !important;
 }
