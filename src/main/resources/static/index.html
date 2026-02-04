@@ -473,6 +473,7 @@
         .then(data => {
             removeTyping();
             addMessage(data.answer || "No response", "chat-bot");
+            showSuggestions(data.suggestions);
         })
         .catch(() => {
             removeTyping();
@@ -487,12 +488,37 @@
     div.innerText = "Typing...";
     messages.appendChild(div);
     messages.scrollTop = messages.scrollHeight;
-}
+    }
 
-function removeTyping() {
+    function removeTyping() {
     const t = document.getElementById("typing");
     if (t) t.remove();
-}
+    }
+
+    function showSuggestions(list) {
+    if (!list || !list.length) return;
+
+    const wrap = document.createElement("div");
+    wrap.style.display = "flex";
+    wrap.style.flexWrap = "wrap";
+    wrap.style.gap = "6px";
+
+    list.forEach(s => {
+        const btn = document.createElement("button");
+        btn.innerText = s;
+        btn.style.fontSize = "12px";
+        btn.style.padding = "4px 8px";
+
+        btn.onclick = () => {
+            input.value = s;
+            sendMessage();
+        };
+
+        wrap.appendChild(btn);
+    });
+
+    messages.appendChild(wrap);
+    }
 
 </script>
 
