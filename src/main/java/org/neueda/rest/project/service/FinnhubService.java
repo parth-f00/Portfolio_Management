@@ -28,8 +28,8 @@ public class FinnhubService {
     @Value("${finnhub.api.key}")
     private String apiKey;
 
-//    @Value("${tiingo.api.key}")
-//    private String tiingoKey;
+    @Value("${tiingo.api.key}")
+    private String tiingoKey;
 
 //    public Map<String,Object> getHistory(String ticker){
 //        try {
@@ -88,7 +88,7 @@ public class FinnhubService {
         System.out.println("Cache miss for history: "+Ticker);
 
 
-        String tiingoKey = "I_AM_A_BAD_KEY";
+//        String tiingoKey = "I_AM_A_BAD_KEY";
         String startDate= LocalDate.now().minusDays(30).toString();
 //        String startDate="2023-01-01";
         String url="https://api.tiingo.com/tiingo/daily/"+Ticker+"/prices?startDate="+startDate+"&token="+tiingoKey;

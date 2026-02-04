@@ -153,16 +153,20 @@
                                     </div>
 
                                     <div class="mb-3">
-                                        <label class="form-label small">Sector</label>
-                                        <select id="sector" class="form-select">
-                                            <option value="Technology">Technology</option>
-                                            <option value="Finance">Finance</option>
-                                            <option value="Healthcare">Healthcare</option>
-                                            <option value="Energy">Energy</option>
-                                            <option value="Real Estate">Real Estate</option>
-                                            <option value="Consumer">Consumer</option>
-                                            <option value="Other">Other</option>
-                                        </select>
+                                        <label for="stockSector" class="form-label">Sector</label>
+
+                                        <input class="form-control" list="sectorOptions" id="stockSector" placeholder="Select or type a sector..." required>
+
+                                        <datalist id="sectorOptions">
+                                            <option value="Technology">
+                                            <option value="Finance">
+                                            <option value="Healthcare">
+                                            <option value="Energy">
+                                            <option value="Consumer Discretionary">
+                                            <option value="Industrials">
+                                            <option value="Utilities">
+                                            <option value="Real Estate">
+                                        </datalist>
                                     </div>
                                     <button type="submit" class="btn btn-primary w-100">Add to Portfolio</button>
                                 </form>
