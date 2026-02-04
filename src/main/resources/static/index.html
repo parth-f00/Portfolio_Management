@@ -433,12 +433,21 @@
     color: white;
     }
 
+    @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(30,136,229,0.6); }
+    70% { box-shadow: 0 0 0 12px rgba(30,136,229,0); }
+    100% { box-shadow: 0 0 0 0 rgba(30,136,229,0); }
+    }
+
+    #chat-toggle {
+    animation: pulse 2s infinite;
+    }
 
 
 </style>
 
 <!-- Toggle Button -->
-<div id="chat-toggle"><i class="bi bi-robot"></i></div>
+<div id="chat-toggle" title="Ask AI Assistant"><i class="bi bi-robot"></i></div>
 
 
 <!-- Chat Window -->
@@ -468,6 +477,7 @@
     /* Open / Close */
     toggleBtn.onclick = () => {
     chatbox.style.display = "flex";
+    toggleBtn.style.animation = "none";
 
     if (!welcomed) {
         addMessage("👋 Hi Kishor! I’m your Portfolio Assistant. Ask me about risk, profit/loss, sectors, or insights.", "chat-bot");
