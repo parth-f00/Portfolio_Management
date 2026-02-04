@@ -1,4 +1,6 @@
+// ✅ UPDATED: Define both endpoints
 const API_URL = "http://localhost:8082/api/portfolio";
+const PREDICT_URL = "http://localhost:8082/api/prediction"; // Port 8082 to match your app
 
 let sectorChartInstance = null;
 let historyChartInstance = null;
@@ -27,39 +29,30 @@ document.addEventListener("DOMContentLoaded", () => {
     fetchCharts();
     fetchAdvisor();
 
-    // 4. SCROLL SPY (New Feature)
+    // 4. SCROLL SPY
     initScrollSpy();
 });
 
-// --- NEW: SCROLL SPY LOGIC ---
-// --- NEW: SCROLL SPY LOGIC (FIXED) ---
-// --- NEW: ROBUST SCROLL SPY ---
+// --- SCROLL SPY LOGIC ---
 function initScrollSpy() {
     const sections = document.querySelectorAll('div[id^="section-"]');
     const navLinks = document.querySelectorAll('.list-group-item');
 
-    // Options: Trigger whenever any part of the target is visible
     const options = {
         root: null,
         rootMargin: '0px',
-        threshold: [0, 0.25, 0.5, 0.75, 1] // Check continuously as visibility changes
+        threshold: [0, 0.25, 0.5, 0.75, 1]
     };
 
     const observer = new IntersectionObserver((entries) => {
-        // 1. We don't just check one entry; we check ALL sections to see who wins
         let maxRatio = 0;
         let activeId = '';
 
-        // Check every section's current visibility on screen
         sections.forEach(section => {
             const rect = section.getBoundingClientRect();
             const visibleHeight = Math.min(window.innerHeight, rect.bottom) - Math.max(0, rect.top);
 
-            // Calculate how much screen height this section occupies
-            // Using a simple heuristic: visible pixels
             if (visibleHeight > 0) {
-                // If it takes up more pixels than the previous winner, it's the new active one
-                // We add a small buffer (50px) to bias towards the top section slightly
                 if (visibleHeight > maxRatio) {
                     maxRatio = visibleHeight;
                     activeId = section.id;
@@ -67,11 +60,9 @@ function initScrollSpy() {
             }
         });
 
-        // 2. If we found a winner, update the sidebar
         if (activeId) {
             navLinks.forEach(link => {
                 link.classList.remove('active-nav');
-                // Robust matching: Check if the onclick string contains the ID
                 const onclickVal = link.getAttribute('onclick');
                 if (onclickVal && onclickVal.includes(activeId)) {
                     link.classList.add('active-nav');
@@ -81,13 +72,6 @@ function initScrollSpy() {
     }, options);
 
     sections.forEach(section => observer.observe(section));
-
-    // Also attach a standard scroll listener as a backup fallback
-    // This ensures that when you stop scrolling, the calculation runs one last time
-    window.addEventListener('scroll', () => {
-         // (Optional) We can throttle this if needed, but for simple apps it's fine
-         // This just triggers the logic above implicitly via the observer loop
-    }, { passive: true });
 }
 
 // --- NAVIGATION ---
@@ -104,8 +88,6 @@ function toggleTheme() {
     const isDark = document.body.classList.contains('dark-mode');
     localStorage.setItem('theme', isDark ? 'dark' : 'light');
     document.getElementById('theme-btn').innerHTML = isDark ? '<i class="bi bi-sun-fill"></i>' : '<i class="bi bi-moon-stars-fill"></i>';
-
-    // Force Chart Re-render
     fetchCharts();
 }
 
@@ -172,6 +154,7 @@ function renderGroupedTable(investments) {
         const trendIcon = group.trend === 'UP' ? '<i class="bi bi-arrow-up-circle-fill text-success"></i>' : (group.trend === 'DOWN' ? '<i class="bi bi-arrow-down-circle-fill text-danger"></i>' : '<i class="bi bi-dash-circle text-muted"></i>');
         const collapseId = `collapse-${group.ticker}`;
 
+        // ✅ NEW: Added the Predict Button Column
         const parentRow = `
             <tr class="clickable-row fw-bold" onclick="toggleCollapse('${collapseId}', this)">
                 <td>${group.ticker} <span class="badge bg-light text-dark border ms-1">${group.sector}</span></td>
@@ -180,6 +163,15 @@ function renderGroupedTable(investments) {
                 <td>${formatMoney(group.currentPrice)}</td>
                 <td class="${plColor}">${formatMoney(group.totalPL)}</td>
                 <td class="fs-5">${trendIcon}</td>
+
+                <td>
+                    <button class="btn btn-sm btn-outline-primary py-0 px-2 shadow-sm"
+                            onclick="predictStock('${group.ticker}'); event.stopPropagation();"
+                            title="Run AI Prediction">
+                        <i class="bi bi-robot"></i> Forecast
+                    </button>
+                </td>
+
                 <td><i class="bi bi-chevron-down text-muted transition-icon"></i></td>
             </tr>
         `;
@@ -201,7 +193,7 @@ function renderGroupedTable(investments) {
                     <td class="text-muted small ps-4"><i class="bi bi-arrow-return-right"></i> Buy: ${formatMoney(inv.buyPrice)}</td>
                     <td class="text-muted small">Qty: ${inv.quantity}</td>
                     <td class="text-muted small">Date: ${dateStr}</td>
-                    <td colspan="3"></td>
+                    <td colspan="4"></td>
                     <td class="text-end">
                         <button class="btn btn-sm btn-outline-danger border-0 p-0" onclick="deleteInvestment(${inv.id})">
                             <i class="bi bi-x-circle"></i> Remove
@@ -213,7 +205,7 @@ function renderGroupedTable(investments) {
 
         const detailContainer = `
             <tr id="${collapseId}" style="display:none;" class="bg-light">
-                <td colspan="7" class="p-0">
+                <td colspan="8" class="p-0">
                     <table class="table table-sm mb-0" style="background-color: transparent;">
                        ${childRows}
                     </table>
@@ -238,21 +230,78 @@ function toggleCollapse(id, rowElement) {
     }
 }
 
+
+async function predictStock(ticker) {
+    const btn = event.target.closest('button');
+    const originalHTML = btn.innerHTML;
+
+    // 1. Loading State
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+    btn.disabled = true;
+
+    try {
+        // 2. Call API
+        const response = await fetch(`${PREDICT_URL}/${ticker}`, {
+            method: 'POST'
+        });
+
+        if (!response.ok) throw new Error("AI Service Unavailable");
+        const data = await response.json();
+
+        // 3. Math Logic
+        const current = data.current_price;
+        const predicted = data.predicted_price;
+        const diff = predicted - current;
+        const percent = ((diff / current) * 100).toFixed(2);
+        const isBullish = diff >= 0;
+
+        // 4. Update Modal Elements
+        document.getElementById('pred-ticker').innerText = data.ticker;
+        document.getElementById('pred-current').innerText = "$" + current.toFixed(2);
+        document.getElementById('pred-future').innerText = "$" + predicted.toFixed(2);
+        document.getElementById('pred-percent').innerText = (isBullish ? "+" : "") + percent + "%";
+
+        // 5. Dynamic Styling (Green vs Red)
+        const header = document.getElementById('pred-modal-header');
+        const signalBadge = document.getElementById('pred-signal');
+        const verdictCard = document.getElementById('pred-verdict-card'); // Optional if you want colored background
+
+        if (isBullish) {
+            header.className = "modal-header text-white bg-success"; // Green Header
+            signalBadge.className = "badge rounded-pill mt-2 px-3 py-2 bg-success";
+            signalBadge.innerText = "BUY SIGNAL 🚀";
+            document.getElementById('pred-percent').className = "display-6 fw-bold mb-0 text-success";
+        } else {
+            header.className = "modal-header text-white bg-danger"; // Red Header
+            signalBadge.className = "badge rounded-pill mt-2 px-3 py-2 bg-danger";
+            signalBadge.innerText = "SELL SIGNAL 🔻";
+            document.getElementById('pred-percent').className = "display-6 fw-bold mb-0 text-danger";
+        }
+
+        // 6. Show Modal
+        const modal = new bootstrap.Modal(document.getElementById('predictionModal'));
+        modal.show();
+
+    } catch (error) {
+        console.error(error);
+        alert("Error: " + error.message);
+    } finally {
+        // 7. Reset Button
+        btn.innerHTML = originalHTML;
+        btn.disabled = false;
+    }
+}
+
 async function fetchCharts() {
-    // 1. Determine Theme Colors
     const isDark = document.body.classList.contains('dark-mode');
     const textColor = isDark ? '#e0e0e0' : '#666';
 
-    // 2. FETCH DATA
     const secRes = await fetch(`${API_URL}/sector-distrinbution`);
     const secData = await secRes.json();
 
     const histRes = await fetch(`${API_URL}/history/portfolio`);
     const histData = await histRes.json();
 
-    // ----------------------------
-    // CHART 1: SECTOR (Pie Chart)
-    // ----------------------------
     const ctx1 = document.getElementById('sectorChart').getContext('2d');
     if (sectorChartInstance) sectorChartInstance.destroy();
 
@@ -271,24 +320,14 @@ async function fetchCharts() {
             plugins: {
                 legend: {
                     position: 'bottom',
-                    labels: {
-                        color: textColor,
-                        usePointStyle: true,
-                        padding: 20,
-                        font: { size: 12 }
-                    }
+                    labels: { color: textColor, usePointStyle: true, padding: 20, font: { size: 12 } }
                 }
             },
             cutout: '70%',
         }
     });
 
-    // ----------------------------
-    // CHART 2: HISTORY (Line Chart)
-    // ----------------------------
     const ctx2 = document.getElementById('historyChart').getContext('2d');
-
-    // Gradient Fill
     let gradient = ctx2.createLinearGradient(0, 0, 0, 400);
     gradient.addColorStop(0, 'rgba(78, 115, 223, 0.5)');
     gradient.addColorStop(1, 'rgba(78, 115, 223, 0.0)');
@@ -315,10 +354,7 @@ async function fetchCharts() {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            interaction: {
-                mode: 'index',
-                intersect: false,
-            },
+            interaction: { mode: 'index', intersect: false },
             plugins: {
                 legend: { display: false },
                 tooltip: {
@@ -328,19 +364,14 @@ async function fetchCharts() {
                     borderColor: '#ccc',
                     borderWidth: 1,
                     callbacks: {
-                        // <--- THIS FIXES THE DATE FORMAT --->
                         title: function(tooltipItems) {
                             const rawDate = tooltipItems[0].label;
                             const d = new Date(rawDate);
-                            // Format: DD-MM-YYYY
                             return `${("0" + d.getDate()).slice(-2)}-${("0" + (d.getMonth() + 1)).slice(-2)}-${d.getFullYear()}`;
                         },
-                        // Optional: Format the value as Currency ($)
                         label: function(context) {
                             let label = context.dataset.label || '';
-                            if (label) {
-                                label += ': ';
-                            }
+                            if (label) { label += ': '; }
                             if (context.parsed.y !== null) {
                                 label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(context.parsed.y);
                             }
@@ -359,16 +390,11 @@ async function fetchCharts() {
                         callback: function(val, index) {
                             const label = this.getLabelForValue(val);
                             const d = new Date(label);
-                            // Axis label format (e.g. Oct 25)
                             return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
                         }
                     }
                 },
-                y: {
-                    display: true,
-                    grid: { display: false },
-                    ticks: { display: false }
-                }
+                y: { display: true, grid: { display: false }, ticks: { display: false } }
             }
         }
     });
@@ -382,27 +408,20 @@ async function fetchAdvisor() {
 
     suggestions.forEach(s => {
         let icon = 'bi-info-circle';
-        let colorClass = 'text-primary'; // Default Blue
-        let bgClass = 'list-group-item';
-
-        // 1. Analyze the text to determine sentiment
-        const text = s.toLowerCase();
+        let colorClass = 'text-primary';
+        let text = s.toLowerCase();
 
         if (text.includes("high")) {
-            // Negative / Warning
             icon = 'bi-exclamation-triangle-fill';
-            colorClass = 'text-danger'; // Red
+            colorClass = 'text-danger';
         } else if (text.includes("low")) {
-            // Opportunity / Info
             icon = 'bi-arrow-down-circle';
-            colorClass = 'text-info'; // Cyan/Blue
+            colorClass = 'text-info';
         } else if (text.includes("balanced") || text.includes("good work")) {
-            // Positive
             icon = 'bi-check-circle-fill';
-            colorClass = 'text-success'; // Green
+            colorClass = 'text-success';
         }
 
-        // 2. Render the item with the chosen style
         list.innerHTML += `
             <li class="list-group-item d-flex align-items-start">
                 <i class="bi ${icon} ${colorClass} me-3 mt-1 fs-5"></i>

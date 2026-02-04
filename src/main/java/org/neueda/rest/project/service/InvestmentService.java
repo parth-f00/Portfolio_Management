@@ -155,7 +155,7 @@ public class InvestmentService {
                Object closeObj=day.get("close");
                Double price=(closeObj instanceof Double) ? (Double)closeObj : ((Integer)closeObj).doubleValue();
                double valueOnThatDay=price*inv.getQuantity();
-                historyMap.put(date,historyMap.getOrDefault(date,0.0)+valueOnThatDay);
+               historyMap.put(date,historyMap.getOrDefault(date,0.0)+valueOnThatDay);
            }
        }
            return historyMap;
