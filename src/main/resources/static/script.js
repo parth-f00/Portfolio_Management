@@ -493,6 +493,7 @@ async function confirmDelete(){
         showToast("Asset removed successfully");
         fetchDashboardData();
         fetchChart();
+        fetchAdvisor();
     }
     catch(error){
     console.error(error);
