@@ -29,5 +29,21 @@ The Portfolio Management application allows users to manage their financial port
 ### External APIs:
 - **FinHub** or **Yahoo Finance API**: For retrieving real-time stock data.
 
+### Installation 
+1. Clone the repository: https://github.com/parth-f00/Portfolio_Management
+2. Navigate to the project directory:
+   cd portfolio-management
+3. Install the backend dependencies: npm install
+4. Set up environement variables:
+   create a .env file in the root directory and add the following variables:
+   DB_URI=your-mongodb-uri
+  JWT_SECRET=your-jwt-secret
+  ALPHA_VANTAGE_API_KEY=your-alpha-vantage-api-key
+5. Start the backend server:
+   npm start
+6. For the frontend:
+7. Navigate to the client directory:
+   cd client 
 
+   
 
