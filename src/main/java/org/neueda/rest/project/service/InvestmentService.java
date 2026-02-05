@@ -1,4 +1,5 @@
 package org.neueda.rest.project.service;
+import lombok.extern.slf4j.Slf4j;
 import org.neueda.rest.project.dto.PortfolioSummary;
 
 import com.opencsv.CSVReader;
@@ -17,6 +18,7 @@ import java.math.BigDecimal;
 import java.util.*;
 
 @Service
+@Slf4j
 public class InvestmentService {
 
     @Autowired
@@ -68,7 +70,8 @@ public class InvestmentService {
                     }
                 }
             }catch (Exception e){
-                System.out.println("trend calculation failed for "+inv.getTicker());
+//                System.out.println("trend calculation failed for "+inv.getTicker());
+                log.error("trend calculation failed for :{}",inv.getTicker());
             }
             dto.setTrend(trend);
             dashboard.add(dto);
@@ -155,7 +158,7 @@ public class InvestmentService {
                Object closeObj=day.get("close");
                Double price=(closeObj instanceof Double) ? (Double)closeObj : ((Integer)closeObj).doubleValue();
                double valueOnThatDay=price*inv.getQuantity();
-                historyMap.put(date,historyMap.getOrDefault(date,0.0)+valueOnThatDay);
+               historyMap.put(date,historyMap.getOrDefault(date,0.0)+valueOnThatDay);
            }
        }
            return historyMap;

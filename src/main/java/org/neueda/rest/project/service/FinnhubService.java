@@ -2,6 +2,7 @@ package org.neueda.rest.project.service;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -17,7 +18,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+
 @Service
+@Slf4j
 public class FinnhubService {
 
     @Value("${finnhub.api.url}")
@@ -26,30 +29,10 @@ public class FinnhubService {
     @Value("${finnhub.api.key}")
     private String apiKey;
 
-//    public Map<String,Object> getHistory(String ticker){
-//        try {
-////            long to= Instant.now().getEpochSecond();
-////            long to= 1735708800L;
-////            long from=1738214400L;
-////            long from=Instant.now().minus(30, ChronoUnit.DAYS).getEpochSecond();
-////            String url=apiUrl.replace("quote?symbol=","stock/candle?symbol=")
-////                    +ticker
-////                    +"&resolution=D&from="+from+"&to="+to+"&token="+apiKey;
-//            String url="https://finnhub.io/api/v1/stock/candle?symbol="
-//                    +ticker
-//                    +"&resolution=D&from="+from+"&to="+to+"&token="+apiKey;
-//            System.out.println("fetchinghistory"+url);
-////             apiUrl= apiUrl+"stock/candle?symbol=";
-////            String finalUrl= apiUrl+ticker+"/history?token="+apiKey;
-//            RestTemplate restTemplate= new RestTemplate();
-//            Map<String,Object> response= restTemplate.getForObject(url, Map.class);
-//            return response;
-//        } catch (Exception e) {
-////            throw new RuntimeException("Failed to fetch stock history from Finnhub", e);
-//            System.out.println("Error fetching stock history: "+ticker + e.getMessage());
-//            return Map.of("error","Failed to fetch stock history");
-//        }
-//    }
+    @Value("${tiingo.api.key}")
+    private String tiingoKey;
+
+
 
     private static final long CACHE_DURATION_MS = 5 * 60 * 1000; // 5 minutes
     private final Map<String, CachedItem<BigDecimal>> priceCache = new ConcurrentHashMap<>();
@@ -76,13 +59,15 @@ public class FinnhubService {
         if(historyCache.containsKey(Ticker)){
             CachedItem<Map<String,Object>> cachedItem= historyCache.get(Ticker);
             if(!cachedItem.isExpired()){
-                System.out.println("Cache hit for history: "+Ticker);
+
+                log.info("cache hit for history:{}",Ticker);
                 return cachedItem.data;
             }
         }
-        System.out.println("Cache miss for history: "+Ticker);
 
-        String tiingoKey="ed6323f960843c766b96a3ffe4ed866599aa1fa9";
+            log.info("cache miss for history:{}",Ticker);
+
+//        String tiingoKey = "I_AM_A_BAD_KEY";
         String startDate= LocalDate.now().minusDays(30).toString();
 //        String startDate="2023-01-01";
         String url="https://api.tiingo.com/tiingo/daily/"+Ticker+"/prices?startDate="+startDate+"&token="+tiingoKey;
@@ -91,7 +76,8 @@ public class FinnhubService {
             RestTemplate restTemplate= new RestTemplate();
             List<Map<String,Object>> response= restTemplate.getForObject(url, List.class);
             if(response==null || response.isEmpty()){
-                return Map.of("s", "no_data","error","Empty response from tiingo");
+                log.warn("API unavailable, switching to mock data");
+                return getMockHistory(Ticker);
             }
 
             List<Double> closes=new ArrayList<>();
@@ -119,7 +105,7 @@ public class FinnhubService {
             for(Double p: trendPrices){
                 sum+=p;
             }
-            double sma=sum/closes.size();
+            double sma=sum/trendPrices.size();
 
             Map<String, Object> finalResult= new HashMap<>();
             finalResult.put("c", closes);
@@ -130,22 +116,64 @@ public class FinnhubService {
             historyCache.put(Ticker, new CachedItem<>(finalResult));
             return finalResult;
         } catch (Exception e) {
-            System.out.println("Error fetching company history: "+Ticker + e.getMessage());
-            return Map.of("s", "no_data","error","Failed to fetch company history");
+
+            log.error("Failed to get company history for {} {}",Ticker, e.getMessage());
+            log.debug("Full stack trace:",e);
+            return getMockHistory(Ticker);
         }
     }
 
+     private Map<String,Object> getMockHistory(String ticker){
+
+        List<Double> closes=new ArrayList<>();
+        List<Long> timestamps=new ArrayList<>();
+
+        List<Map<String, Object>> priceList=new ArrayList<>();
+
+        double currentPrice=240+(Math.random()*100);
+        long now= LocalDate.now().atStartOfDay(java.time.ZoneOffset.UTC).toEpochSecond();;
+
+        for(int i=30;i>0;i--) {
+            double change = (Math.random() - 0.5) * 5;
+            currentPrice += change;
+
+            double price = Math.round(currentPrice * 100.0) / 100.0;
+            long timeStamp= now-(i*86400L);
+            String dateStr= Instant.ofEpochSecond(timeStamp).toString();
+            closes.add(price);
+            timestamps.add(timeStamp);
+
+            Map<String, Object>dayEntry= new HashMap<>();
+            dayEntry.put("date", dateStr);
+            dayEntry.put("close", price);
+            priceList.add(dayEntry);
+        }
+            double sum=0;
+            for(Double p:closes){
+                sum+=p;
+            }
+            double sma=sum/closes.size();
+            Map<String, Object> mock=new HashMap<>();
+            mock.put("c", closes);
+            mock.put("t",timestamps);
+            mock.put("sma",sma);
+            mock.put("s", "ok");
+            mock.put("prices",priceList);
+            historyCache.put(ticker,new CachedItem<>(mock));
+            return mock;
+        }
 
 
     public BigDecimal getStockPrice(String ticker){
         if(priceCache.containsKey(ticker)){
             CachedItem<BigDecimal> cachedItem= priceCache.get(ticker);
             if(!cachedItem.isExpired()){
-                System.out.println("Cache hit for price: "+ticker);
+                log.info("Cache hit for price:{}",ticker);
                 return cachedItem.data;
             }
         }
-        System.out.println("Cache miss for price: "+ticker);
+
+        log.info("cache miss for price:{}",ticker);
         try {
             String finalUrl= apiUrl+ticker+"&token="+apiKey;
             RestTemplate restTemplate= new RestTemplate();
@@ -159,7 +187,8 @@ public class FinnhubService {
 //            return BigDecimal.valueOf(150.00); // Dummy stock price
         } catch (Exception e) {
 //            throw new RuntimeException("Failed to fetch stock price from Finnhub", e);
-            System.out.println("Error fetching stock price: "+ticker + e.getMessage());
+
+            log.error("error fetching price for :{}",ticker);
             return BigDecimal.ZERO;
         }
     }
@@ -168,7 +197,7 @@ public class FinnhubService {
     static class FinnhubResponse{
          @JsonProperty("c")
         private Double currentPrice;
-    }
 
+    }
 
 }
