@@ -32,6 +32,10 @@ public class Investment {
 
     private LocalDateTime purchaseDate;
 
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="customer_id", nullable = true)
+    private Customer customer;
+
     public Investment() {
 
     }

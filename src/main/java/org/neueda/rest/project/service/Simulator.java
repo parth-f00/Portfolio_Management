@@ -21,7 +21,7 @@ public class Simulator {
     public ImpactAnalysis SimulateTrade(Investment proposedTrade) {
         List<Investment> realPortfolio = repository.findAll();
 
-        // 1. Create Simulation List (Deep Copy)
+
         List<Investment> simulated = new ArrayList<>();
         for (Investment inv : realPortfolio) {
             Investment copy = new Investment();
@@ -33,27 +33,26 @@ public class Simulator {
         }
         simulated.add(proposedTrade);
 
-        // 2. Calculate Sector % BEFORE Trade
         double realTotal = calculateTotalExposure(realPortfolio);
         Map<String, Double> oldSectors = calculateSectorPct(realPortfolio, realTotal);
 
-        // 3. Calculate Sector % AFTER Trade
+
         double simTotal = calculateTotalExposure(simulated);
         Map<String, Double> newSectors = calculateSectorPct(simulated, simTotal);
 
-        // 4. Build Analysis
+
         ImpactAnalysis analysis = new ImpactAnalysis(oldSectors, newSectors);
 
-        // 5. Check Risk on the NEW Portfolio
+
         assessRisk(analysis, simulated, simTotal);
 
         return analysis;
     }
 
-    // --- HELPER METHODS ---
+
 
     private double calculateTotalExposure(List<Investment> list) {
-        // We use this ONLY for calculating percentages, not for displaying Value
+
         if (list == null || list.isEmpty()) return 0.0;
         return list.stream()
                 .mapToDouble(i -> i.getBuyPrice().multiply(BigDecimal.valueOf(i.getQuantity())).doubleValue())
@@ -68,13 +67,13 @@ public class Simulator {
             double val = inv.getBuyPrice().multiply(BigDecimal.valueOf(inv.getQuantity())).doubleValue();
             map.put(inv.getSector(), map.getOrDefault(inv.getSector(), 0.0) + val);
         }
-        // Convert to Percentage
+
         map.replaceAll((k, v) -> (v / total) * 100.0);
         return map;
     }
 
     private void assessRisk(ImpactAnalysis analysis, List<Investment> portfolio, double totalVal) {
-        // 1. Concentration Risk (Single Stock)
+
         double maxExposure = 0;
         String biggestTicker = "None";
         Map<String, Double> tickerMap = new HashMap<>();
@@ -95,10 +94,10 @@ public class Simulator {
         analysis.setHighestStockPct(concPct);
         analysis.setHighestStockTicker(biggestTicker);
 
-        // 2. Diversity Risk (Sector Count)
+
         long sectorCount = portfolio.stream().map(Investment::getSector).distinct().count();
 
-        // 3. Verdict
+
         if (concPct > 30.0) {
             analysis.setRiskLevel("HIGH");
             analysis.setRiskMessage("⚠️ DANGER: " + biggestTicker + " dominates " + (int)concPct + "% of your portfolio.");

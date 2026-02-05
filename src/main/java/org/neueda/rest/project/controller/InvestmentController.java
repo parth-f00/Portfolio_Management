@@ -42,10 +42,7 @@ public class InvestmentController {
         investmentService.deleteById(id);
     }
 
-//    @GetMapping("/history/{ticker}")
-//    public Map<String, Object> getInvestmentHistory(@PathVariable String ticker){
-//        return finnhubService.getCompanyHistory(ticker);
-//    }
+
 
     @GetMapping("/total-value")
         public Double getTotalValue(){
@@ -76,8 +73,6 @@ public class InvestmentController {
 
         @PostMapping("/batch")
         public List<Investment> saveBatch(@RequestBody List<Investment> investments){
-//            investmentService.saveBatch(file);
-//            return "Batch upload successful";
             return investmentService.saveAll(investments);
         }
 
