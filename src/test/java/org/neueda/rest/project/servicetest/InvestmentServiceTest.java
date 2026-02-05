@@ -1,4 +1,4 @@
-package org.neueda.rest.project.ServiceTest;
+package org.neueda.rest.project.servicetest;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,7 +11,6 @@ import org.neueda.rest.project.service.InvestmentService;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
