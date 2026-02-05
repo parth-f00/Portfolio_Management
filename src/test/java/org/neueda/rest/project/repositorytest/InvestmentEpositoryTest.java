@@ -1,4 +1,4 @@
-package org.neueda.rest.project.RepositoryTest;
+package org.neueda.rest.project.repositorytest;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;

@@ -1,15 +1,13 @@
-package org.neueda.rest.project.ServiceTest;
+package org.neueda.rest.project.servicetest;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neueda.rest.project.bot.BotResponse;
-import org.neueda.rest.project.dto.DashboardDTO;
 import org.neueda.rest.project.dto.PortfolioSummary;
 import org.neueda.rest.project.service.AIService;
 import org.neueda.rest.project.service.BotService;
 import org.neueda.rest.project.service.InvestmentService;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 

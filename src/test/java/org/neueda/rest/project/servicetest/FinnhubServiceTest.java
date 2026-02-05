@@ -1,4 +1,4 @@
-package org.neueda.rest.project.ServiceTest;
+package org.neueda.rest.project.servicetest;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

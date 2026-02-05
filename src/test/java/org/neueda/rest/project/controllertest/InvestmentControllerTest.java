@@ -1,4 +1,4 @@
-package org.neueda.rest.project.ControllerTest;
+package org.neueda.rest.project.controllertest;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
