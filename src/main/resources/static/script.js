@@ -398,7 +398,7 @@ async function fetchCharts() {
                         }
                     }
                 },
-                y: { display: true, grid: { display: false }, ticks: { display: false } }
+                y: { display: true, grid: { display: false }, ticks: { display: true } }
             }
         }
     });
@@ -456,7 +456,7 @@ async function addInvestment(e) {
         ticker: document.getElementById('ticker').value.toUpperCase(),
         buyPrice: parseFloat(document.getElementById('buyPrice').value),
         quantity: parseInt(document.getElementById('quantity').value),
-        sector: document.getElementById('sector').value,
+        sector: document.getElementById('stockSector').value,
         purchaseDate: document.getElementById('purchaseDate').value + "T00:00:00"
     };
     await fetch(API_URL + "/", {
@@ -492,7 +492,7 @@ async function confirmDelete(){
 
         showToast("Asset removed successfully");
         fetchDashboardData();
-        fetchChart();
+        fetchCharts();
         fetchAdvisor();
     }
     catch(error){
@@ -501,12 +501,7 @@ async function confirmDelete(){
     idToDelete=null;
     }
 }
-//async function deleteInvestment(id) {
-//    if (!confirm("Remove this entry?")) return;
-//    await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
-//    fetchDashboardData();
-//    fetchCharts();
-//}
+
 
 async function uploadCsv() {
     const fileInput = document.getElementById('csv-file-input');
@@ -558,45 +553,87 @@ async function runSimulation() {
         quantity: parseInt(document.getElementById('sim-qty').value),
         sector: document.getElementById('sim-sector').value
     };
-    const res = await fetch(`${API_URL}/simulate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(trade)
-    });
-    const data = await res.json();
 
-    document.getElementById('sim-results').style.display = 'block';
+    try {
+        const res = await fetch(`${API_URL}/simulate`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(trade)
+        });
+        const data = await res.json();
 
-    const riskBadge = document.getElementById('sim-risk-icon-box');
-    const riskTitle = document.getElementById('sim-risk-level');
-    if (data.riskLevel === 'HIGH') {
-        riskBadge.className = "rounded-circle p-3 me-3 text-white bg-danger";
-        riskTitle.innerText = "HIGH RISK";
-    } else if (data.riskLevel === 'MEDIUM') {
-        riskBadge.className = "rounded-circle p-3 me-3 text-dark bg-warning";
-        riskTitle.innerText = "MEDIUM RISK";
-    } else {
-        riskBadge.className = "rounded-circle p-3 me-3 text-white bg-success";
-        riskTitle.innerText = "HEALTHY";
-    }
-    document.getElementById('sim-risk-msg').innerText = data.riskMessage;
+        document.getElementById('sim-results').style.display = 'block';
 
-    const conc = data.highestStockPct;
-    document.getElementById('sim-conc-name').innerText = data.highestStockTicker;
-    document.getElementById('sim-conc-val').innerText = conc.toFixed(1) + "%";
-    document.getElementById('sim-conc-bar').style.width = conc + "%";
-    document.getElementById('sim-conc-bar').className = conc > 30 ? "progress-bar bg-danger" : "progress-bar bg-info";
+        const riskBadge = document.getElementById('sim-risk-icon-box');
+        const riskTitle = document.getElementById('sim-risk-level');
+        const riskMsg = document.getElementById('sim-risk-msg');
 
-    const list = document.getElementById('sector-impact-list');
-    list.innerHTML = "";
-    const allSec = new Set([...Object.keys(data.oldSectorAllocation), ...Object.keys(data.newSectorAllocation)]);
-    allSec.forEach(sec => {
-        const oldP = data.oldSectorAllocation[sec] || 0;
-        const newP = data.newSectorAllocation[sec] || 0;
-        if(Math.abs(newP - oldP) > 0.1) {
-             list.innerHTML += `<div class="list-group-item d-flex justify-content-between"><span class="small">${sec}</span><span class="small fw-bold">${oldP.toFixed(1)}% <i class="bi bi-arrow-right"></i> ${newP.toFixed(1)}%</span></div>`;
+        // Reset classes
+        riskBadge.className = "rounded-circle p-3 me-3 text-white";
+
+        // ✅ NEW: Handle all 5 Risk Levels from Java
+        switch (data.riskLevel) {
+            case 'CRITICAL':
+                riskBadge.classList.add('bg-dark'); // Black/Dark Grey for Critical
+                riskTitle.innerText = "CRITICAL RISK 🚨";
+                break;
+            case 'HIGH':
+                riskBadge.classList.add('bg-danger'); // Red
+                riskTitle.innerText = "HIGH RISK";
+                break;
+            case 'MEDIUM':
+                riskBadge.classList.remove('text-white');
+                riskBadge.classList.add('text-dark', 'bg-warning'); // Yellow
+                riskTitle.innerText = "MEDIUM RISK";
+                break;
+            case 'EXCELLENT':
+                riskBadge.classList.add('bg-primary'); // Blue
+                riskTitle.innerText = "EXCELLENT 💎";
+                break;
+            default: // LOW
+                riskBadge.classList.add('bg-success'); // Green
+                riskTitle.innerText = "HEALTHY";
         }
-    });
+
+        riskMsg.innerText = data.riskMessage;
+
+        // Concentration Bar Logic
+        const conc = data.highestStockPct;
+        document.getElementById('sim-conc-name').innerText = data.highestStockTicker;
+        document.getElementById('sim-conc-val').innerText = conc.toFixed(1) + "%";
+
+        const bar = document.getElementById('sim-conc-bar');
+        bar.style.width = conc + "%";
+
+        // Color the bar based on severity
+        bar.className = "progress-bar";
+        if (conc > 50) bar.classList.add("bg-dark");
+        else if (conc > 30) bar.classList.add("bg-danger");
+        else bar.classList.add("bg-info");
+
+        // Sector Impact List
+        const list = document.getElementById('sector-impact-list');
+        list.innerHTML = "";
+        const allSec = new Set([...Object.keys(data.oldSectorAllocation), ...Object.keys(data.newSectorAllocation)]);
+
+        allSec.forEach(sec => {
+            const oldP = data.oldSectorAllocation[sec] || 0;
+            const newP = data.newSectorAllocation[sec] || 0;
+            // Only show if there is a noticeable change (> 0.1%)
+            if(Math.abs(newP - oldP) > 0.1) {
+                 list.innerHTML += `
+                    <div class="list-group-item d-flex justify-content-between">
+                        <span class="small">${sec}</span>
+                        <span class="small fw-bold">
+                            ${oldP.toFixed(1)}% <i class="bi bi-arrow-right"></i> ${newP.toFixed(1)}%
+                        </span>
+                    </div>`;
+            }
+        });
+
+    } catch (e) {
+        console.error("Simulation failed", e);
+    }
 }
 
 function formatMoney(amount) {

@@ -230,13 +230,20 @@
                                     </div>
                                 </div>
                                 <div class="mb-3">
-                                    <label class="small text-muted">Sector</label>
-                                    <select class="form-select" id="sim-sector">
-                                        <option value="Technology">Technology</option>
-                                        <option value="Finance">Finance</option>
-                                        <option value="Energy">Energy</option>
-                                        <option value="Other">Other</option>
-                                    </select>
+                                    <label class="small text-muted">Target Sector</label>
+
+                                    <input class="form-control" list="simSectorOptions" id="sim-sector" placeholder="Type or select a sector...">
+
+                                    <datalist id="simSectorOptions">
+                                        <option value="Technology">
+                                        <option value="Finance">
+                                        <option value="Healthcare">
+                                        <option value="Energy">
+                                        <option value="Consumer Discretionary">
+                                        <option value="Industrials">
+                                        <option value="Utilities">
+                                        <option value="Real Estate">
+                                    </datalist>
                                 </div>
                                 <button class="btn btn-dark w-100" onclick="runSimulation()">Run Health Check</button>
                             </div>

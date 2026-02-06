@@ -248,3 +248,22 @@ body.dark-mode #advisor-list .list-group-item:hover {
     border-left-color: #0dcaf0;
     background-color: rgba(13, 202, 240, 0.05) !important;
 }
+
+body.dark-mode .btn-outline-dark {
+    color: #f8f9fa;
+    border-color: #f8f9fa;
+}
+
+body.dark-mode .btn-outline-dark:hover {
+    background-color: #f8f9fa;
+    color: #000000;
+}
+
+.navbar-brand {
+    color: var(--text-main) !important;
+}
+
+
+h5.text-secondary {
+    color: var(--text-main) !important;
+}

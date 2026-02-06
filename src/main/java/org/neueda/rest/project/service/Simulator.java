@@ -74,7 +74,8 @@ public class Simulator {
 
     private void assessRisk(ImpactAnalysis analysis, List<Investment> portfolio, double totalVal) {
 
-        double maxExposure = 0;
+        // 1. Calculate Single Stock Concentration (Existing Logic)
+        double maxStockExposure = 0;
         String biggestTicker = "None";
         Map<String, Double> tickerMap = new HashMap<>();
 
@@ -84,29 +85,62 @@ public class Simulator {
         }
 
         for (Map.Entry<String, Double> entry : tickerMap.entrySet()) {
-            if (entry.getValue() > maxExposure) {
-                maxExposure = entry.getValue();
+            if (entry.getValue() > maxStockExposure) {
+                maxStockExposure = entry.getValue();
                 biggestTicker = entry.getKey();
             }
         }
-
-        double concPct = (totalVal > 0) ? (maxExposure / totalVal) * 100 : 0;
-        analysis.setHighestStockPct(concPct);
+        double stockConcPct = (totalVal > 0) ? (maxStockExposure / totalVal) * 100 : 0;
+        analysis.setHighestStockPct(stockConcPct);
         analysis.setHighestStockTicker(biggestTicker);
 
 
+        // 2. Calculate Sector Concentration (New Logic)
+        // We use the map we already calculated in 'SimulateTrade'
+        String dominantSector = "None";
+        double maxSectorPct = 0;
+
+        for (Map.Entry<String, Double> entry : analysis.getNewSectorAllocation().entrySet()) {
+            if (entry.getValue() > maxSectorPct) {
+                maxSectorPct = entry.getValue();
+                dominantSector = entry.getKey();
+            }
+        }
         long sectorCount = portfolio.stream().map(Investment::getSector).distinct().count();
 
 
-        if (concPct > 30.0) {
+        // 3. ENHANCED RISK RULES (Hierarchical Check)
+
+        // CASE A: Extreme Single Stock Risk (> 50%)
+        if (stockConcPct > 50.0) {
+            analysis.setRiskLevel("CRITICAL");
+            analysis.setRiskMessage("🚨 CRITICAL: You are gambling! " + biggestTicker + " is " + (int)stockConcPct + "% of your entire wealth.");
+        }
+        // CASE B: Extreme Sector Risk (> 60%)
+        else if (maxSectorPct > 60.0) {
             analysis.setRiskLevel("HIGH");
-            analysis.setRiskMessage("⚠️ DANGER: " + biggestTicker + " dominates " + (int)concPct + "% of your portfolio.");
-        } else if (sectorCount < 3) {
+            analysis.setRiskMessage("⚠️ HIGH RISK: Too much exposure to " + dominantSector + " (" + (int)maxSectorPct + "%). If this sector crashes, you lose.");
+        }
+        // CASE C: High Single Stock Risk (> 30%)
+        else if (stockConcPct > 30.0) {
+            analysis.setRiskLevel("HIGH");
+            analysis.setRiskMessage("⚠️ CONCENTRATED: " + biggestTicker + " is becoming too dominant (" + (int)stockConcPct + "%).");
+        }
+        // CASE D: Poor Diversification (< 3 Sectors)
+        else if (sectorCount < 3) {
             analysis.setRiskLevel("MEDIUM");
-            analysis.setRiskMessage("⚠️ WARNING: Poor Diversification (Only " + sectorCount + " sectors).");
-        } else {
+            analysis.setRiskMessage("⚠️ WARNING: Poor Diversification. You only hold assets in " + sectorCount + " sectors.");
+        }
+        // CASE E: Perfect Balance (> 5 Sectors, No stock > 20%)
+        else if (sectorCount >= 5 && stockConcPct < 20.0) {
+            analysis.setRiskLevel("EXCELLENT");
+            analysis.setRiskMessage("💎 EXCELLENT: Your portfolio is perfectly balanced and defensive.");
+        }
+        // CASE F: Standard Healthy
+        else {
             analysis.setRiskLevel("LOW");
-            analysis.setRiskMessage("✅ HEALTHY: Your portfolio is well balanced.");
+            analysis.setRiskMessage("✅ HEALTHY: Your portfolio is well diversified.");
         }
     }
+
 }
